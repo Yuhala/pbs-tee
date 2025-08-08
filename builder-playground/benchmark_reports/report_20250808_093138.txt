@@ -1,0 +1,5 @@
+
+===== Starting Benchmark Run (20250808_093138) =====
+RPC URL: http://localhost:8545
+
+===== Sending 1 test transactions using Foundry cast =====
