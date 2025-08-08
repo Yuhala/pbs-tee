@@ -62,69 +62,16 @@ go build -o builder-playground . # build builder-playground or use "go run main.
 ```
 
 ## Testing smart contract deployment
-- The tests folder contains some scripts on building and testing simply smart contracts on our local devnet. We use Hardhat for contract dev.
-- Install and initialize Hardhat and deps
+- The tests folder contains some scripts on building and testing simply smart contracts on our local devnet. We use Foundry for contract dev.
 
 ```bash
-cd tests
-mkdir builder-contract && cd builder-contract
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt-get install -y nodejs
-npm init -y
-npm install --save-dev hardhat 
-npm hardhat init 
-```
-- Replace the `contracts/Lock.sol` with your solidity contract. For example `Helloworld.sol` as follows
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-contract HelloWorld {
-    string public message;
-
-    constructor(string memory initMessage) {
-        message = initMessage;
-    }
-
-    function setMessage(string memory newMessage) public {
-        message = newMessage;
-    }
-}
-```
-- Add your devnet information to the `hardhat.config.js` file.
-```js
-const PRIVATE_KEY = "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6"; // Replace with your testnet private key
-
-
-/** @type import('hardhat/config').HardhatUserConfig */
-module.exports = {
-  solidity: "0.8.28",
-  networks: {
-    builderplayground: {
-      url: "http://localhost:8545",  // or your builder playground L2 RPC endpoint
-      accounts: [PRIVATE_KEY]
-    }
-  }
-};
-```
-- Compile and deploy the smart contract on the devnet
-```bash
-npx hardhat compile
-npx hardhat run --network builderplayground scripts/deploy.js
-```
-
-- Using foundry
-```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
 forge init hello-foundry
 # add code in src/Helloworld.sol
 ```
-- Write deploy script as in `script/DeployHelloworld.s.sol`
-- Deploy the contract with:
-```bash
-forge script script/DeployHelloWorld.s.sol:DeployHelloWorld --fork-url <RPC_URL> --broadcast
-# Example: forge script script/DeployHelloWorld.s.sol:DeployHelloWorld --fork-url  http://localhost:8545 --broadcast
-# RPC_URL = http://localhost:8545
-```
+- Write example smart contract, example in `src/HelloWorld.sol`
+
 - To avoid entering rpc url and other constants, enter them in the `.env` file and source this file before running.
 - Another way to deploy contract:
 ```bash
@@ -146,15 +93,18 @@ cast code 0xc4De0f5aB3C6EA3882C39BD356d2c4C1D4B0B6Ea --rpc-url $RPC_URL
 ```bash
 cast call 0xc4De0f5aB3C6EA3882C39BD356d2c4C1D4B0B6Ea "sayHello()" --rpc-url $RPC_URL | cast --to-ascii
 ```
-- Testing transaction (after deploying SendHello)
+- Build and deploy the `SendHello` transaction which is state-changing and invokes the block builder.
 ```bash
+# Build first with forge create
+forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY src/SendHello.sol:SendHello --legacy --broadcast
+# send transaction
 cast send 0xA7e3FFB41Db860Fd0D97186e0c3De1E424c96C9f \
     "setMessage(string)" "Hello from L2 sequencer!" \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY
 	--gas-price 2000000000000 # increase if it fails
 ```
-Results should look like
+Results should look like below: we can see block hash and number, indicating a block is created. 
 ```bash
 blockHash            0x118dd2e2daf61cea406c18c869fa13fc3a364eb266a6bd9469f97b18713d896d
 blockNumber          313
