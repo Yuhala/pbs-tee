@@ -135,24 +135,68 @@ cast call $CONTRACT_ADDRESS "message()(string)" --rpc-url $RPC_URL
 cast block latest --rpc-url http://localhost:8545
 ```
 
+## Viewing metrics
+- The builder playground output specifies Prometheus metrics can be obtained at port `7300`. To view from a local PC, SSH as follows:
+```bash
+ssh -L <port>:localhost:<port> <username@remote-hostname>
+```
+
 ## Integrating Rollup-Boost for external block building
-
-
-
-
-- Generate JSON web tokens (JWT). Do this once and copy tokens if components are on different systems. 
-```bash
-mkdir -p tokens && cd tokens
-openssl rand -hex 32 > builder-jwt.hex # generate builder token
-openssl rand -hex 32 > l2-jwt.hex # generate builder token
+- Rollup-Boost serves as a relay between your L2 stack and an external block builder. So first we need to configure an external block builder and then use rollup boost to link them. We will use [Flashbot's op-rbuilder](https://github.com/flashbots/op-rbuilder.git).
+- The `builder-playground cook opstack ... ` command from builder-playground spins up an OP stack including a rollup-boost instance as one of its containers. The --external-builder flag you pass to cook opstack tells the embedded Rollup-Boost instance:
+>When building blocks, call this builder at URL X instead of building locally.
+```scss
+builder-playground cook opstack ...
+     ├── op-geth (L1 execution)
+     ├── op-node (L2 node)
+     ├── rollup-boost  ← starts automatically here
+     ├── relays
+     ├── ...
 ```
-- The actual JWTs will be generated internally using these 32-byte hex strings.
+So we don't need to run it separately. However, if you are running rollup-boost separately, you will need to point rollup-boost to the `Engine API` of the L2 execution client (`op-geth`). From the builder playground logs, this should be `http://localhost:8551`. See [Rollup-Boost documentation here](https://github.com/flashbots/rollup-boost).
 
-- Setup Rollup-Boost
+- Clean up any previous builder-playground state from previous runs and re-run builder-playground.
 ```bash
-cargo run --bin rollup-boost -- \
- --l2-url http://localhost:8545 \
- --l2-jwt-path tokens/l2-jwt.hex \
- --builder-jwt-path tokens/builder-jwt.hex \
- --builder-url http://localhost:8546
+rm -rf ~/.local/share/reth
+sudo rm -rf ~/.playground
+./builder-playground cook opstack --external-builder http://host.docker.internal:4444
 ```
+- You can do all of the above by launching the script [start-builder-playground](./builder-playground/start-builder-playground.sh).
+- Setup and run `op-rbuilder`:
+```bash
+git clone https://github.com/flashbots/op-rbuilder.git
+cd op-rbuilder
+#cargo run --bin op-rbuilder -- node --builder.playground # assuming you used --external-builder http://host.docker.internal:4444 when building op-stack
+cargo run -p op-rbuilder --bin op-rbuilder -- node \
+    --chain $HOME/.playground/devnet/l2-genesis.json \
+    --http --http.port 2222 \
+    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $HOME/.playground/devnet/jwtsecret \
+    --port 30333 --disable-discovery \
+    --metrics 127.0.0.1:9011 \
+    --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+    --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@127.0.0.1:30304
+```
+
+## Running the builder in a (TDX) VM.
+- Start by launching a VM and connecting to it. For a regular VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md).
+- Get your VM's public IP address via `curl ifconfig.me`. Start builder-playground the option `--external-builder http://<VM-IP>:28545`. The docs use `28545` as default port for external block builder. 
+- In the VM, create files `l2-genesis.json` and `jwtsecret` containing the corresponding information from produced from builder-playground. You can then create an `.env` pointing to these and source it.
+```bash
+LS_GENESIS="/path/to/l1-genesis.json"
+JWT_SECRET="/path/to/jwtsecret"
+```
+- Then download and run op-rbuilder as follows:
+```bash
+cargo run -p op-rbuilder --bin op-rbuilder -- node \
+    --chain $LS_GENESIS \
+    --http --http.port 2222 \
+    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $JWT_SECRET \
+    --port 30333 --disable-discovery \
+    --metrics 0.0.0.0:9011 \
+    --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+    --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@<host IP>:30304
+```
+- While in the VM, get the `op-rbuilder` software as described above. Run it while specifying the above port as follows:
+```bash
+
+
