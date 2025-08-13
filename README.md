@@ -62,7 +62,7 @@ go build -o builder-playground . # build builder-playground or use "go run main.
 
 ## Integrating an external builder
 - Rollup-Boost serves as a relay between your L2 stack and an external block builder. So first we need to configure an external block builder and then use rollup boost to link them. We use [Flashbot's op-rbuilder](https://github.com/flashbots/op-rbuilder.git).
-- The `builder-playground cook opstack ... ` command from builder-playground spins up an OP stack including a rollup-boost instance as one of its containers. The --external-builder flag you pass to cook opstack tells the embedded Rollup-Boost instance:
+- The `builder-playground cook opstack ... ` command from builder-playground spins up an OP stack including a rollup-boost instance as one of its containers. The `--external-builder` flag you pass to `cook opstack` tells the embedded Rollup-Boost instance:
 >When building blocks, call this builder at URL X instead of building locally.
 ```scss
 builder-playground cook opstack ...
