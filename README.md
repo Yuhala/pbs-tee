@@ -218,12 +218,15 @@ scp ~/.playground/devnet/jwtsecret tdx@192.168.122.100:~
 - In the VM, create an .env file defining the paths to these files.
 ```bash
 L2_GENESIS="$HOME/l2-genesis.json"
-JWT_SECRET="$HOME/jwtsecret"
+JWT_SECRET="curl -H "Authorization: Bearer $TOKEN" http://192.168.122.100:4444/health"
 ```
 - Then download and run op-rbuilder.
 ```bash
 git clone https://github.com/flashbots/op-rbuilder.git
 cd op-rbuilder
+# rm old reth if present
+rm -rf ~/.local/share/reth
+# run op-rbuilder
 cargo run -p op-rbuilder --bin op-rbuilder -- node \
     --chain $L2_GENESIS \
     --http --http.port 2222 \
@@ -232,4 +235,10 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
     --metrics 0.0.0.0:9011 \
     --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
     --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@<host IP>:30304
+```
+- If you see logs from op-rbuilder similar to the following, this means it is actively receiving blocks from the consensus engine outside. You can confirm by stopping builder playground outside, which will cause these messages to disappear.
+```bash
+...
+2025-08-13T08:30:33.959995Z  INFO Received block from consensus engine number=859 hash=0xa5ae15d7e4268686874607f6ee80d6511466e0db91a2e65695dd584460eb99ca
+2025-08-13T08:30:35.960807Z  INFO Received block from consensus engine number=860 hash=0xa20f29c307cfb1f9c6bc3aa7d36945a8e09c37a4201a0d1b5defd37562865bab
 ```
