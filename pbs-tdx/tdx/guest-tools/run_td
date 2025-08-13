@@ -93,18 +93,19 @@ def do_run(img_path, gpus):
     if ubuntu_version != '24.04':
         cpu_args='host,-avx10'
 
+    #qemu_cmds = ['qemu-system-x86_64',
     qemu_cmds = ['qemu-system-x86_64',
 		 '-accel', 'kvm',
-		 '-m', '100G', '-smp', '32',
+		 '-m', '64G', '-smp', '16',
 		 '-name', f'{process_name},process={process_name},debug-threads=on',
 		 '-cpu', f'{cpu_args}',
 		 '-object', '{"qom-type":"tdx-guest","id":"tdx","quote-generation-socket":{"type": "vsock", "cid":"2","port":"4050"}}',
-		 '-object', 'memory-backend-ram,id=mem0,size=100G',
+		 '-object', 'memory-backend-ram,id=mem0,size=64G',
 		 '-machine', 'q35,kernel_irqchip=split,confidential-guest-support=tdx,memory-backend=mem0',
 		 '-bios', tdvf_params,
 		 '-nographic', '-daemonize',
                  '-nodefaults', '-vga', 'none',
-		 '-device', 'virtio-net-pci,netdev=nic0_td', '-netdev', f'user,id=nic0_td,hostfwd=tcp::{ssh_port}-:22',
+		 '-device', 'virtio-net-pci,netdev=nic0_td', '-netdev', f'bridge,id=nic0_td,br=virbr0',
 		 '-drive', f'file={img_path},if=none,id=virtio-disk0',
 		 '-device', 'virtio-blk-pci,drive=virtio-disk0',
 		 '-pidfile', pidfile

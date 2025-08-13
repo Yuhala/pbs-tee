@@ -62,7 +62,7 @@ qemu-system-x86_64 \
   -smp ${CPUS} \
   -drive file=${CLOUD_IMG},format=qcow2 \
   -drive file=${SEED_IMG},format=raw \
-  -netdev user,id=net0,hostfwd=tcp::${SSH_PORT}-:22 \
+  -netdev bridge,id=net0,br=virbr0 \
   -device virtio-net-pci,netdev=net0 \
   -nographic
 

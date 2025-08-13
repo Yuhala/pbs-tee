@@ -15,9 +15,17 @@ apt install --yes qemu-utils libguestfs-tools virtinst genisoimage # from TDX sc
 # from the host system and will collect dhclient into the appliance
 apt install --yes isc-dhcp-client #&>> ${LOGFILE}
 ```
+- Configure libvirt
+```bash
+sudo virsh net-start default
+# verify the state is active
+sudo virsh net-list --all
+```
+
 - Build and start the proposer VM
 ```bash
 ./boot_normal_vm.sh
+  # login to VM with: ssh -p 2223 ubuntu@localhost
 ```
 - To leave VM do 
 ```bash
@@ -34,5 +42,6 @@ cd tdx/guest-tools/image
 sudo ./create-td-image.sh -v 24.04
 cd ..
 ./run_td
-# SSH into VM
+# SSH into VM. Example: ssh -p 10022 tdx@localhost 
+# Default password is: 123456
 ```

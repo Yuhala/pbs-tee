@@ -177,18 +177,55 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
     --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@127.0.0.1:30304
 ```
 
-## Running the builder in a (TDX) VM.
-- Start by launching a VM and connecting to it. For a regular VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md).
-- Get your VM's public IP address via `curl ifconfig.me`. Start builder-playground the option `--external-builder http://<VM-IP>:28545`. The docs use `28545` as default port for external block builder. 
-- In the VM, create files `l2-genesis.json` and `jwtsecret` containing the corresponding information from produced from builder-playground. You can then create an `.env` pointing to these and source it.
+## Running the builder in a separate (TDX) VM.
+- First configure libvirt
 ```bash
-LS_GENESIS="/path/to/l1-genesis.json"
-JWT_SECRET="/path/to/jwtsecret"
+sudo virsh net-start default
+# verify the state is active
+sudo virsh net-list --all
 ```
-- Then download and run op-rbuilder as follows:
+- Launch a VM with qemu and connect to it. For a regular (no TDX) VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md).
+- I use the `virbr0` interface for the VMs, so their IPs will be `192.168.122.xxx`. To get all IPs attached to this bridge, do `ip neigh show dev virbr0`. Your VM's IP will be one of them.
+- Connect to the VM with
 ```bash
+ssh -p 2223 ubuntu@IP
+# default password: 123456
+```
+- If it's a TDX VM, connect to it with
+```bash
+ssh tdx@vm-ip
+# default passworld: 123456
+```
+- Setup VM
+```bash
+# install packages
+sudo apt update
+sudo apt install build-essential clang libclang-dev
+sudo apt install pkg-config
+```
+
+- Start builder-playground (outside builder VM) the option `--external-builder http://<VM-IP>:2222`. 
+```bash
+./builder-playground cook opstack --external-builder http://192.168.122.100:2222
+```
+- Copy builder playground l2-genesis file and jwtsecret to VM. You can then create an `.env` pointing to these and source it.
+```bash
+# do this on the host: change IP to your VM's IP
+scp ~/.playground/devnet/l2-genesis.json tdx@192.168.122.100:~
+scp ~/.playground/devnet/jwtsecret tdx@192.168.122.100:~
+```
+
+- In the VM, create an .env file defining the paths to these files.
+```bash
+L2_GENESIS="$HOME/l2-genesis.json"
+JWT_SECRET="$HOME/jwtsecret"
+```
+- Then download and run op-rbuilder.
+```bash
+git clone https://github.com/flashbots/op-rbuilder.git
+cd op-rbuilder
 cargo run -p op-rbuilder --bin op-rbuilder -- node \
-    --chain $LS_GENESIS \
+    --chain $L2_GENESIS \
     --http --http.port 2222 \
     --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $JWT_SECRET \
     --port 30333 --disable-discovery \
@@ -196,7 +233,3 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
     --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
     --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@<host IP>:30304
 ```
-- While in the VM, get the `op-rbuilder` software as described above. Run it while specifying the above port as follows:
-```bash
-
-
