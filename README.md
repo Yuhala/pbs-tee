@@ -1,13 +1,12 @@
 ## Context
-TODO
+Testing proposer-builder-separation (PBS) with VM-based builder. [Builder Playground](https://github.com/flashbots/builder-playground) is used to to spin a local L1 + L2 environment based on Docker: EL/CL clients, validators, MEV-Boost relay, sequencer components, and Rollup-Boost enhances the L2 OP-Stack by enabling external block building or TEE-enabled ordering. It intercepts Engine API calls (`engine_FCU`, `engine_getPayLoad`) to route them to both the proposer node and a separate builder node, validating the builder's block before consensus. 
 
-We use [Builder Playground](https://github.com/flashbots/builder-playground) and [Rollup-Boost](https://github.com/flashbots/rollup-boost) from Flashbots. Builder-playground is used to spin up L1 or L2 environments using Docker: EL/CL clients, validators, MEV-Boost relay, sequencer components, etc. Rollup-Boost enhances the L2 OP-Stack by enabling external block building or TEE-enabled ordering. It intercepts Engine API calls (`engine_FCU`, `engine_getPayLoad`) to route them to both the proposer node and a separate builder node, validating the builder's block before consensus.
+[Flashbot's op-rbuilder](https://github.com/flashbots/op-rbuilder.git) is used as the external block builder. This Readme provides setups where all these components run on the same host (could also be a VM) or where the builder runs in a separate (TEE-enabled) VM.
 
+## Part I: L1 + L2 stack and builder on the same host
 
-## Builder playgroud setup 
-We first bring up the L1 + L2 (sequencer + proposer) stack using builder-playground. We then configure a separate builder instance with rollup-boost and point it to both the OP stack proposer and a local builder node. When sequencer receives `engine_FCU`, Rollup‑Boost mirrors it to the builder; upon `engine_getPayload`, collects the builder block, validates it, and feeds it back to the sequencer if valid. In certain configurations, the builder will be run in an Intel TDX VM.
-
-- Setup Cargo
+### Setup builder playgroud
+- Install Cargo
 ```bash
 sudo apt update
 sudo apt install curl build-essential pkg-config libssl-dev -y
@@ -22,7 +21,8 @@ sudo apt install golang-go -y
 go version # check go version
 ```
 
-- Setup OP-stack (L1 + L2)
+- Now spin up the L1 + L2 (sequencer + proposer) stack using builder-playground, specifying the RPC endpoint throughwhich the builder will be reached. A rollup-boost instance is (automaticall) lauched by the `cook` command. When sequencer receives `engine_FCU`, Rollup‑Boost mirrors it to the builder; upon `engine_getPayload`, collects the builder block, validates it, and feeds it back to the sequencer if valid. 
+
 ```bash
 git clone https://github.com/Yuhala/vm-playground.git && cd vm-playground
 cd builder-playground
@@ -55,13 +55,125 @@ go build -o builder-playground . # build builder-playground or use "go run main.
 ```
 - The private key used by the batcher to sign transactions in L2 can be found in the file `~/.playground/devnet/docker-compose.yaml`
 
-
 - Query the testnet with some curl instructions by running the `test-query.sh` script.
 ```bash
 ./test-query.sh
 ```
 
-## Testing smart contract deployment
+## Integrating an external builder
+- Rollup-Boost serves as a relay between your L2 stack and an external block builder. So first we need to configure an external block builder and then use rollup boost to link them. We use [Flashbot's op-rbuilder](https://github.com/flashbots/op-rbuilder.git).
+- The `builder-playground cook opstack ... ` command from builder-playground spins up an OP stack including a rollup-boost instance as one of its containers. The --external-builder flag you pass to cook opstack tells the embedded Rollup-Boost instance:
+>When building blocks, call this builder at URL X instead of building locally.
+```scss
+builder-playground cook opstack ...
+     ├── op-geth (L1 execution)
+     ├── op-node (L2 node)
+     ├── rollup-boost  ← starts automatically here
+     ├── relays
+     ├── ...
+```
+So we don't need to run it separately. However, if you are running rollup-boost separately, you will need to point rollup-boost to the `Engine API` of the L2 execution client (`op-geth`). From the builder playground logs, this should be `http://localhost:8551`. See [Rollup-Boost documentation here](https://github.com/flashbots/rollup-boost).
+
+- Clean up any previous builder-playground state from previous runs and re-run builder-playground.
+```bash
+rm -rf ~/.local/share/reth
+sudo rm -rf ~/.playground
+./builder-playground cook opstack --external-builder http://host.docker.internal:4444
+```
+- You can do all of the above by launching the script [start-builder-playground](./builder-playground/start-builder-playground.sh).
+- Setup and run `op-rbuilder`:
+```bash
+git clone https://github.com/flashbots/op-rbuilder.git
+cd op-rbuilder
+#cargo run --bin op-rbuilder -- node --builder.playground # assuming you used --external-builder http://host.docker.internal:4444 when building op-stack
+cargo run -p op-rbuilder --bin op-rbuilder -- node \
+    --chain $HOME/.playground/devnet/l2-genesis.json \
+    --http --http.port 2222 \
+    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $HOME/.playground/devnet/jwtsecret \
+    --port 30333 --disable-discovery \
+    --metrics 127.0.0.1:9011 \
+    --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+    --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@127.0.0.1:30304
+```
+- Logs from op-rbuilder similar to the following shows the builder is actively receiving blocks from the consensus engine in the L1 + L2 stack.
+```bash
+...
+2025-08-13T08:30:33.959995Z  INFO Received block from consensus engine number=859 hash=0xa5ae15d7e4268686874607f6ee80d6511466e0db91a2e65695dd584460eb99ca
+2025-08-13T08:30:35.960807Z  INFO Received block from consensus engine number=860 hash=0xa20f29c307cfb1f9c6bc3aa7d36945a8e09c37a4201a0d1b5defd37562865bab
+```
+
+
+## Part II: L1 + L2 stack and builder on separate machines or VMs
+Here we will spin up the L1 + L2 stack on the host machine and run the builder in a VM (TDX enabled or not)
+
+- First configure libvirt for correct VM setup and management
+```bash
+sudo virsh net-start default
+# verify the state is active
+sudo virsh net-list --all
+```
+- Launch a VM with qemu and connect to it. For a regular (no TDX) VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md).
+- I use the `virbr0` interface for the VMs, so their IPs will be `192.168.122.xxx`. To get all IPs attached to this bridge, do `ip neigh show dev virbr0`. Your VM's IP will be one of them.
+- Connect to the VM with
+```bash
+ssh -p 2223 ubuntu@IP
+# default password: 123456
+```
+- If it's a TDX VM, connect to it with
+```bash
+ssh tdx@vm-ip
+# default passworld: 123456
+```
+- Setup VM
+Install the following packages in the VM
+```bash
+# install packages
+sudo apt update
+sudo apt install build-essential clang libclang-dev
+sudo apt install pkg-config
+```
+
+- Start builder-playground (outside builder VM) the option `--external-builder http://<VM-IP>:2222`. 
+```bash
+./builder-playground cook opstack --external-builder http://192.168.122.100:2222
+```
+- Copy builder playground l2-genesis file and jwtsecret to VM. You can then create an `.env` pointing to these and source it.
+```bash
+# do this on the host: change IP to your VM's IP
+scp ~/.playground/devnet/l2-genesis.json tdx@192.168.122.100:~
+scp ~/.playground/devnet/jwtsecret tdx@192.168.122.100:~
+```
+
+- In the VM, create an .env file defining the paths to these files.
+```bash
+L2_GENESIS="$HOME/l2-genesis.json"
+JWT_SECRET="curl -H "Authorization: Bearer $TOKEN" http://192.168.122.100:4444/health"
+```
+- Then download and run op-rbuilder.
+```bash
+git clone https://github.com/flashbots/op-rbuilder.git
+cd op-rbuilder
+# rm old reth if present
+rm -rf ~/.local/share/reth
+# run op-rbuilder
+cargo run -p op-rbuilder --bin op-rbuilder -- node \
+    --chain $L2_GENESIS \
+    --http --http.port 2222 \
+    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $JWT_SECRET \
+    --port 30333 --disable-discovery \
+    --metrics 0.0.0.0:9011 \
+    --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+    --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@<host IP>:30304
+```
+- If you see logs from op-rbuilder similar to the following, this means it is actively receiving blocks from the consensus engine outside. You can confirm by stopping builder playground outside, which will cause these messages to disappear.
+```bash
+...
+2025-08-13T08:30:33.959995Z  INFO Received block from consensus engine number=859 hash=0xa5ae15d7e4268686874607f6ee80d6511466e0db91a2e65695dd584460eb99ca
+2025-08-13T08:30:35.960807Z  INFO Received block from consensus engine number=860 hash=0xa20f29c307cfb1f9c6bc3aa7d36945a8e09c37a4201a0d1b5defd37562865bab
+```
+
+## Testing smart contract deployment (optional)
+> This section is not complete yet, but some of the tests work
 - The tests folder contains some scripts on building and testing simply smart contracts on our local devnet. We use Foundry for contract dev.
 
 ```bash
@@ -139,106 +251,4 @@ cast block latest --rpc-url http://localhost:8545
 - The builder playground output specifies Prometheus metrics can be obtained at port `7300`. To view from a local PC, SSH as follows:
 ```bash
 ssh -L <port>:localhost:<port> <username@remote-hostname>
-```
-
-## Integrating Rollup-Boost for external block building
-- Rollup-Boost serves as a relay between your L2 stack and an external block builder. So first we need to configure an external block builder and then use rollup boost to link them. We will use [Flashbot's op-rbuilder](https://github.com/flashbots/op-rbuilder.git).
-- The `builder-playground cook opstack ... ` command from builder-playground spins up an OP stack including a rollup-boost instance as one of its containers. The --external-builder flag you pass to cook opstack tells the embedded Rollup-Boost instance:
->When building blocks, call this builder at URL X instead of building locally.
-```scss
-builder-playground cook opstack ...
-     ├── op-geth (L1 execution)
-     ├── op-node (L2 node)
-     ├── rollup-boost  ← starts automatically here
-     ├── relays
-     ├── ...
-```
-So we don't need to run it separately. However, if you are running rollup-boost separately, you will need to point rollup-boost to the `Engine API` of the L2 execution client (`op-geth`). From the builder playground logs, this should be `http://localhost:8551`. See [Rollup-Boost documentation here](https://github.com/flashbots/rollup-boost).
-
-- Clean up any previous builder-playground state from previous runs and re-run builder-playground.
-```bash
-rm -rf ~/.local/share/reth
-sudo rm -rf ~/.playground
-./builder-playground cook opstack --external-builder http://host.docker.internal:4444
-```
-- You can do all of the above by launching the script [start-builder-playground](./builder-playground/start-builder-playground.sh).
-- Setup and run `op-rbuilder`:
-```bash
-git clone https://github.com/flashbots/op-rbuilder.git
-cd op-rbuilder
-#cargo run --bin op-rbuilder -- node --builder.playground # assuming you used --external-builder http://host.docker.internal:4444 when building op-stack
-cargo run -p op-rbuilder --bin op-rbuilder -- node \
-    --chain $HOME/.playground/devnet/l2-genesis.json \
-    --http --http.port 2222 \
-    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $HOME/.playground/devnet/jwtsecret \
-    --port 30333 --disable-discovery \
-    --metrics 127.0.0.1:9011 \
-    --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-    --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@127.0.0.1:30304
-```
-
-## Running the builder in a separate (TDX) VM.
-- First configure libvirt
-```bash
-sudo virsh net-start default
-# verify the state is active
-sudo virsh net-list --all
-```
-- Launch a VM with qemu and connect to it. For a regular (no TDX) VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md).
-- I use the `virbr0` interface for the VMs, so their IPs will be `192.168.122.xxx`. To get all IPs attached to this bridge, do `ip neigh show dev virbr0`. Your VM's IP will be one of them.
-- Connect to the VM with
-```bash
-ssh -p 2223 ubuntu@IP
-# default password: 123456
-```
-- If it's a TDX VM, connect to it with
-```bash
-ssh tdx@vm-ip
-# default passworld: 123456
-```
-- Setup VM
-```bash
-# install packages
-sudo apt update
-sudo apt install build-essential clang libclang-dev
-sudo apt install pkg-config
-```
-
-- Start builder-playground (outside builder VM) the option `--external-builder http://<VM-IP>:2222`. 
-```bash
-./builder-playground cook opstack --external-builder http://192.168.122.100:2222
-```
-- Copy builder playground l2-genesis file and jwtsecret to VM. You can then create an `.env` pointing to these and source it.
-```bash
-# do this on the host: change IP to your VM's IP
-scp ~/.playground/devnet/l2-genesis.json tdx@192.168.122.100:~
-scp ~/.playground/devnet/jwtsecret tdx@192.168.122.100:~
-```
-
-- In the VM, create an .env file defining the paths to these files.
-```bash
-L2_GENESIS="$HOME/l2-genesis.json"
-JWT_SECRET="curl -H "Authorization: Bearer $TOKEN" http://192.168.122.100:4444/health"
-```
-- Then download and run op-rbuilder.
-```bash
-git clone https://github.com/flashbots/op-rbuilder.git
-cd op-rbuilder
-# rm old reth if present
-rm -rf ~/.local/share/reth
-# run op-rbuilder
-cargo run -p op-rbuilder --bin op-rbuilder -- node \
-    --chain $L2_GENESIS \
-    --http --http.port 2222 \
-    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $JWT_SECRET \
-    --port 30333 --disable-discovery \
-    --metrics 0.0.0.0:9011 \
-    --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-    --trusted-peers enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@<host IP>:30304
-```
-- If you see logs from op-rbuilder similar to the following, this means it is actively receiving blocks from the consensus engine outside. You can confirm by stopping builder playground outside, which will cause these messages to disappear.
-```bash
-...
-2025-08-13T08:30:33.959995Z  INFO Received block from consensus engine number=859 hash=0xa5ae15d7e4268686874607f6ee80d6511466e0db91a2e65695dd584460eb99ca
-2025-08-13T08:30:35.960807Z  INFO Received block from consensus engine number=860 hash=0xa20f29c307cfb1f9c6bc3aa7d36945a8e09c37a4201a0d1b5defd37562865bab
 ```
