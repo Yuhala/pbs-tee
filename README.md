@@ -191,7 +191,7 @@ forge init hello-foundry
 ```
 - Write example smart contract, example in `src/HelloWorld.sol`
 
-- To avoid entering rpc url and other constants, enter them in the `.env` file and source this file before running.
+- To avoid entering rpc url and other constants, enter them in the [.env](./builder-playground/.env) file and source this file before running.
 - Another way to deploy contract:
 ```bash
 forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY src/HelloWorld.sol:HelloWorld --legacy --broadcast
