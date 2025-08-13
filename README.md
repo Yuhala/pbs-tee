@@ -179,6 +179,37 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
 2025-08-13T08:30:35.960807Z  INFO Received block from consensus engine number=860 hash=0xa20f29c307cfb1f9c6bc3aa7d36945a8e09c37a4201a0d1b5defd37562865bab
 ```
 
+## Benchmarking with contender
+[Contender]() is a tool provided by Flashbots used to simulate MEV/builder-client interactions. We can use it to benchmark and stress-test our local blockchain setup.
+- Install Contender CLI
+```bash
+sudo apt install libsqlite3-dev 
+RUSTFLAGS="--cfg tokio_unstable" cargo install --git https://github.com/flashbots/contender --bin contender
+```
+- Send some transactions to the builder. Observe the output from op-rbuilder.
+```bash
+contender spam --tpb 50 -r <builder endpoint> fill-block
+# Example: contender spam --tpb 50 -r http://192.168.122.100:4444 fill-block
+```
+```bash
+contender spam scenario:stress.toml \
+  -r http://localhost:8545 \
+  --auth http://192.168.122.100:4444 \
+  --jwt ~/.playground/devnet/jwtsecret \
+  --fcu \
+  --op \
+  --tps 200 -d 2 -w 3
+```
+- See [Contender Readme](https://github.com/flashbots/contender/blob/main/README.md) for more examples and options.
+
+contender spam scenario:stress.toml \
+  -r http://localhost:8545 \
+  --auth http://192.168.122.100:4444 \
+  --jwt ~/.playground/devnet/jwtsecret \
+  --fcu \
+  --op \
+  --tps 200 -d 2 -w 3
+
 ## Testing smart contract deployment (optional)
 > This section is not complete yet, but some of the tests work
 - The tests folder contains some scripts on building and testing simply smart contracts on our local devnet. We use Foundry for contract dev.
@@ -259,3 +290,4 @@ cast block latest --rpc-url http://localhost:8545
 ```bash
 ssh -L <port>:localhost:<port> <username@remote-hostname>
 ```
+
