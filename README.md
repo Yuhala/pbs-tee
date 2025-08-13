@@ -133,11 +133,15 @@ sudo apt install build-essential clang libclang-dev
 sudo apt install pkg-config
 ```
 
-- Start builder-playground (outside builder VM) the option `--external-builder http://<VM-IP>:2222`. 
+- Start builder-playground on host with the option `--external-builder http://<VM-IP>:4444`. 
 ```bash
-./builder-playground cook opstack --external-builder http://192.168.122.100:2222
+# first clean previous states
+rm -rf ~/.local/share/reth
+sudo rm -rf ~/.playground
+# start builder playground
+./builder-playground cook opstack --external-builder http://192.168.122.100:4444
 ```
-- Copy builder playground l2-genesis file and jwtsecret to VM. You can then create an `.env` pointing to these and source it.
+- Copy builder playground l2-genesis file and jwtsecret to VM. You can then create an `.env` file containing the paths to these and source it.
 ```bash
 # do this on the host: change IP to your VM's IP
 scp ~/.playground/devnet/l2-genesis.json tdx@192.168.122.100:~
@@ -147,9 +151,12 @@ scp ~/.playground/devnet/jwtsecret tdx@192.168.122.100:~
 - In the VM, create an .env file defining the paths to these files.
 ```bash
 L2_GENESIS="$HOME/l2-genesis.json"
-JWT_SECRET="curl -H "Authorization: Bearer $TOKEN" http://192.168.122.100:4444/health"
+JWT_SECRET="$HOME/jwtsecret"
 ```
-- Then download and run op-rbuilder.
+```bash
+source .env
+```
+- Then download and run op-rbuilder in the VM.
 ```bash
 git clone https://github.com/flashbots/op-rbuilder.git
 cd op-rbuilder
