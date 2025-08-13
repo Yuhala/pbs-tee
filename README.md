@@ -114,12 +114,12 @@ sudo virsh net-list --all
 ```
 - Launch a VM with qemu and connect to it. For a regular (no TDX) VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md).
 - I use the `virbr0` interface for the VMs, so their IPs will be `192.168.122.xxx`. To get all IPs attached to this bridge, do `ip neigh show dev virbr0`. Your VM's IP will be one of them.
-- Connect to the VM with
+- If it's a regular VM lauched with the above script `boot_normal_vm.sh`, connect to it with:
 ```bash
 ssh -p 2223 ubuntu@IP
 # default password: 123456
 ```
-- If it's a TDX VM, connect to it with
+- Otherwise, if it's a TDX VM, connect to it with:
 ```bash
 ssh tdx@vm-ip
 # default passworld: 123456
