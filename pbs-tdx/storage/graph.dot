@@ -1,0 +1,22 @@
+digraph G {
+  rankdir=LR;
+  node [shape=record];
+
+  el [label="el|{rpc:30303|http:8545|ws:8546|authrpc:8551|metrics:9090}"];
+  beacon [label="beacon|{p2p:9000|p2p:9000|quic-p2p:9100|http:3500}"];
+  validator [label="validator"];
+  op_geth [label="op-geth|{http:8545|ws:8546|authrpc:8551|rpc:30303|metrics:6061}"];
+  rollup_boost [label="rollup-boost|{authrpc:8551}"];
+  op_node [label="op-node|{http:8549|p2p:9003|p2p:9003|metrics:7300}"];
+  op_batcher [label="op-batcher"];
+
+  beacon -> el [label="authrpc"];
+  validator -> beacon [label="http"];
+  rollup_boost -> op_geth [label="authrpc"];
+  op_node -> el [label="http"];
+  op_node -> beacon [label="http"];
+  op_node -> rollup_boost [label="authrpc"];
+  op_batcher -> el [label="http"];
+  op_batcher -> op_geth [label="http"];
+  op_batcher -> op_node [label="http"];
+}

@@ -102,6 +102,8 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
 2025-08-13T08:30:35.960807Z  INFO Received block from consensus engine number=860 hash=0xa20f29c307cfb1f9c6bc3aa7d36945a8e09c37a4201a0d1b5defd37562865bab
 ```
 
+## Kubernetes based setup
+- To setup and run all components using Kubernetes (can be done on a regular host or TDX VM), see [this Readme](pbs-tdx/README.md). Note that this is a little different from Claudiu's setup in that we don't use Kata to spin up pods running in a VM. However, we adapt Claudiu's kubernetes configurations to simply run regular pods.
 
 ## Part II: L1 + L2 stack and builder on separate machines or VMs
 Here we will spin up the L1 + L2 stack on the host machine and run the builder in a VM (TDX enabled or not)

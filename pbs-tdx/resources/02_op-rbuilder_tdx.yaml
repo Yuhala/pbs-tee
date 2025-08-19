@@ -1,0 +1,84 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    port.authrpc: "8551"
+    port.http: "8545"
+    port.metrics: "9090"
+    port.rpc: "30303"
+    service: op-rbuilder
+  labels:
+    l2.service: op-rbuilder
+  name: op-rbuilder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      l2.service: op-rbuilder
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        port.authrpc: "8551"
+        port.http: "8545"
+        port.metrics: "9090"
+        port.rpc: "30303"
+        service: op-rbuilder
+      labels:
+        l2.service: op-rbuilder
+    spec:
+      containers:
+        - args:
+            - node
+            - --authrpc.port
+            - "8551"
+            - --authrpc.addr
+            - 0.0.0.0
+            - --authrpc.jwtsecret
+            - /data/jwtsecret
+            - --http
+            - --http.addr
+            - 0.0.0.0
+            - --http.port
+            - "8545"
+            - --chain
+            - /data/l2-genesis.json
+            - --datadir
+            - /data_op_reth
+            - --disable-discovery
+            - --color
+            - never
+            - --metrics
+            - 0.0.0.0:9090
+            - --port
+            - "30303"
+            - --builder.enable-revert-protection
+            - --trusted-peers
+            - enode://79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8@op-geth:30303
+          image: ghcr.io/flashbots/op-rbuilder:sha-4f1931b
+          name: op-rbuilder
+          ports:
+            - containerPort: 8551
+              protocol: TCP
+            - containerPort: 8545
+              protocol: TCP
+            - containerPort: 9090
+              protocol: TCP
+            - containerPort: 30303
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/jwtsecret
+              name: op-rbuilder-jwtsecret
+            - mountPath: /data/l2-genesis.json
+              name: op-rbuilder-l2-genesis
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /mnt/sceal/storage/jwtsecret
+          name: op-rbuilder-jwtsecret
+        - hostPath:
+            path: /mnt/sceal/storage/l2-genesis.json
+            type: File
+          name: op-rbuilder-l2-genesis
