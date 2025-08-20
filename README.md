@@ -114,12 +114,18 @@ sudo virsh net-start default
 # verify the state is active
 sudo virsh net-list --all
 ```
-- Launch a VM with qemu and connect to it. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md). For a regular (no TDX) VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. 
+- Launch a VM with qemu and connect to it. For a TDX VM, simply follow the instructions in [this Readme](./pbs-tdx/README.md) (section **Setup and run VM**). For a regular (no TDX) VM, you can use a script like `pbs-tdx/boot_normal_vm.sh`. 
 - I use the `virbr0` interface for the VMs, so their IPs will be `192.168.122.xxx`. To get all IPs attached to this bridge, do `ip neigh show dev virbr0`. Your VM's IP will be one of them.
 - If it's a TDX VM, connect to it with:
 ```bash
 ssh tdx@vm-IP
+# example: ssh tdx@192.168.122.100
 # default passworld: 123456
+```
+- If the above SSH fails, you may have to flush the SSH config of any previous VM with the same IP. For example below. Follow the instructions `remove with ...` from the resulting SSH error and redo the SSH login.
+```bash
+# example below; adapt with the right IP
+ssh-keygen -f '/home/pyuhala/.ssh/known_hosts' -R '192.168.122.100'
 ```
 - If it's a regular VM lauched with the above script `boot_normal_vm.sh`, connect to it with:
 ```bash

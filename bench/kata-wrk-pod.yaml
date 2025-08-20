@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kata-wrk
+spec:
+  containers:
+    - name: kata-wrk-c
+      image: ubuntu:24.04
+      command: ["sleep", "infinity"]
+      tty: true
+      stdin: true

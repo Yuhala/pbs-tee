@@ -3,7 +3,7 @@
 
 
 
-## Setup
+## Setup and run VM
 - Install virtualization requirments
 ```bash
 sudo apt update
@@ -41,28 +41,42 @@ x
 cd tdx/guest-tools/image
 sudo ./create-td-image.sh -v 24.04
 cd ..
-./run_td
+sudo ./run_td #script modified to use bridge IPs. Get your VM's IP with ip neigh show dev virbr0
 # SSH into VM. Example: ssh -p 10022 tdx@localhost 
 # Default password is: 123456
 ```
 ## Running everything in a TDX VM
 > Here we run all the components: builder playground + the block builder (using Kubernetes) within a TDX VM. The instructions to set this up and test are as follows. Note that the same instructions apply if you aren't in a TDX VM.
 
+- Install packages
+```bash
+```bash
+# install packages
+sudo apt update
+sudo apt install build-essential clang libclang-dev
+sudo apt install pkg-config
+```
 - Install a lightweight kubernetes, we use `k3s`. 
 ```bash
 sudo /usr/local/bin/k3s-uninstall.sh
 curl -sfL https://get.k3s.io | sh -
 echo "alias k='sudo /usr/local/bin/k3s kubectl'" >> ~/.bashrc
 source ~/.bashrc
+# test by entering k in terminal
 ```
 Since we are running everything in TDX, there is no need to install Kata which was used (see [Claudiu's repo](https://github.com/cbarbieru/builder-playground-opstack-k8s)) to spin kubernetes pods running in TDX VMs for specific components. We have modified the kubernetes configuration files (in the `resources` subfolder) to spin regular pods without Kata.
-- Spin up and run a test with.
+- Clone this repo and spin up the devnet
 ```bash
-mkdir -p /mnt/sceal/storage #TODO: spin up builder playground pods to recreate genesis files in this storage folder.
+git clone https://github.com/Yuhala/vm-playground.git && cd vm-playground/pbs-tdx
+sudo mkdir -p /mnt/sceal/storage 
 sudo cp -a storage/. /mnt/sceal/storage/
+
 cd resources
 k create namespace tdx-vm-test
-k apply -f 00_opstack_rollup_boost.yaml -f 02_op-rbuilder_tdx.yaml -f testing.yaml -n tdx-vm-test
+k apply -f 00_opstack_rollup_boost.yaml -f 02_op-rbuilder_tdx.yaml -n tdx-vm-test
 ```
-
+- Send some contender transactions to the testnet
+```bash
+k apply -f testing.yaml -n tdx-vm-test
+```
 
