@@ -114,4 +114,15 @@ Requests/sec:  80986.99
 Transfer/sec:     66.58MB
 ```
 
-### Nginx and wrk in TDX VM with kubernetes
+### Nginx and wrk in TDX VM with kubernetes pods
+```bash
+Running 30s test @ http://nginx-service:80/
+  4 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.52ms    1.98ms  45.87ms   89.13%
+    Req/Sec    20.44k     3.49k   32.17k    70.23%
+  2446281 requests in 30.10s, 1.96GB read
+Requests/sec:  81277.48
+Transfer/sec:     66.82MB
+
+```
