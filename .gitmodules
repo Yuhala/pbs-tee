@@ -1,3 +1,6 @@
 [submodule "builder-playground/tests/builder-contract/hello-foundry/lib/forge-std"]
 	path = builder-playground/tests/builder-contract/hello-foundry/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "op-rbuilder-pyuhala"]
+	path = op-rbuilder-pyuhala
+	url = https://github.com/Yuhala/op-rbuilder.git
