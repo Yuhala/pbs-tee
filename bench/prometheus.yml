@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # op-node
+  - job_name: 'op-node'
+    static_configs:
+      - targets: ['10.42.0.52:7300']
+
+  # op-geth
+  - job_name: 'op-geth'
+    static_configs:
+      - targets: ['10.42.0.51:6061']
+
+  # el (Reth)
+  - job_name: 'el'
+    static_configs:
+      - targets: ['10.42.0.49:9090']
+
+  # op-rbuilder (guessing port 8080 or 9090)
+  - job_name: 'op-rbuilder'
+    static_configs:
+      - targets: ['10.42.0.87:8080']  # Change if needed

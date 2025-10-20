@@ -1,0 +1,103 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+  
+  - job_name: "beacon-static"
+    static_configs:
+      - targets: ["10.43.197.124:3500"]
+
+  - job_name: "el-geth-static"
+    static_configs:
+      - targets: ["10.43.154.230:9090"]
+
+  - job_name: "op-geth-static"
+    static_configs:
+      - targets: ["10.43.96.196:6061"]
+
+  - job_name: "op-node-static"
+    static_configs:
+      - targets: ["10.43.71.162:7300"]
+
+  - job_name: "op-rbuilder-static"
+    static_configs:
+      - targets: ["10.43.79.208:9090"]
+
+  - job_name: "beacon"
+    kubernetes_sd_configs:
+    - role: service
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name]
+      action: keep
+      regex: beacon
+    - source_labels: [__meta_kubernetes_service_port_name]
+      action: keep
+      regex: "3500"
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      action: replace
+      target_label: __metrics_path__
+      replacement: /metrics
+
+  - job_name: "el-geth"
+    kubernetes_sd_configs:
+    - role: service
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name]
+      action: keep
+      regex: el
+    - source_labels: [__meta_kubernetes_service_port_name]
+      action: keep
+      regex: "9090"
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      action: replace
+      target_label: __address__
+      replacement: "el:9090"
+
+  - job_name: "op-geth"
+    kubernetes_sd_configs:
+    - role: service
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name]
+      action: keep
+      regex: op-geth
+    - source_labels: [__meta_kubernetes_service_port_name]
+      action: keep
+      regex: "6061"
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      action: replace
+      target_label: __address__
+      replacement: "op-geth:6061"
+
+  - job_name: "op-node"
+    kubernetes_sd_configs:
+    - role: service
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name]
+      action: keep
+      regex: op-node
+    - source_labels: [__meta_kubernetes_service_port_name]
+      action: keep
+      regex: "7300"
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      action: replace
+      target_label: __address__
+      replacement: "op-node:7300"
+      
+  - job_name: "op-rbuilder"
+    kubernetes_sd_configs:
+    - role: service
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name]
+      action: keep
+      regex: op-rbuilder
+    - source_labels: [__meta_kubernetes_service_port_name]
+      action: keep
+      regex: "9090"
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      action: replace
+      target_label: __address__
+      replacement: "op-rbuilder:9090"

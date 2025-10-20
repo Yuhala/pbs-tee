@@ -1,0 +1,431 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unified-node
+  labels:
+    app: unified-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unified-node
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: unified-node
+    spec:
+      runtimeClassName: kata-qemu-tdx  
+      containers:
+        # --- Beacon ---
+        - name: beacon
+          image: sigp/lighthouse:v7.0.0-beta.0
+          command:
+            - lighthouse
+          args:
+            - bn
+            - --datadir
+            - /data_beacon
+            - --testnet-dir
+            - /data/testnet-dir
+            - --enable-private-discovery
+            - --disable-peer-scoring
+            - --staking
+            - --enr-address
+            - 127.0.0.1
+            - --enr-udp-port
+            - "9000"
+            - --enr-tcp-port
+            - "9000"
+            - --enr-quic-port
+            - "9100"
+            - --port
+            - "9000"
+            - --quic-port
+            - "9100"
+            - --http
+            - --http-port
+            - "3500"
+            - --http-address
+            - 0.0.0.0
+            - --http-allow-origin
+            - '*'
+            - --disable-packet-filter
+            - --target-peers
+            - "0"
+            - --execution-endpoint
+            - http://127.0.0.1:8551  # EL auth port
+            - --execution-jwt
+            - /data/jwtsecret
+            - --always-prepare-payload
+            - --prepare-payload-lookahead
+            - "8000"
+            - --suggested-fee-recipient
+            - 0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990
+            - --builder
+            - http://127.0.0.1:5555
+            - --builder-fallback-epochs-since-finalization
+            - "0"
+            - --builder-fallback-disable-checks
+          ports:
+            - containerPort: 9000
+              protocol: UDP
+            - containerPort: 9000
+              protocol: TCP
+            - containerPort: 9100
+              protocol: TCP
+            - containerPort: 3500
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/jwtsecret
+              name: jwtsecret
+            - mountPath: /data/testnet-dir
+              name: testnet
+            - mountPath: /artifacts
+              name: artifacts
+            - mountPath: /data_beacon
+              name: volume-beacon-data
+
+        # --- Execution Layer (Reth) ---
+        - name: el
+          image: ghcr.io/paradigmxyz/reth:v1.4.8
+          command:
+            - /usr/local/bin/reth
+          args:
+            - node
+            - --chain
+            - /data/genesis.json
+            - --datadir
+            - /data_reth
+            - --color
+            - never
+            - --ipcpath
+            - /data_reth/reth.ipc
+            - --addr
+            - 127.0.0.1
+            - --port
+            - "30303"
+            - --http
+            - --http.addr
+            - 0.0.0.0
+            - --http.api
+            - admin,eth,web3,net,rpc,mev,flashbots
+            - --http.port
+            - "8545"
+            - --ws
+            - --ws.addr
+            - 0.0.0.0
+            - --ws.port
+            - "8546"
+            - --ws.api
+            - eth,web3,net,txpool,debug,trace
+            - --ws.origins
+            - '*'
+            - --authrpc.port
+            - "8551"
+            - --authrpc.addr
+            - 0.0.0.0
+            - --authrpc.jwtsecret
+            - /data/jwtsecret
+            - --metrics
+            - 0.0.0.0:9090
+            - --engine.persistence-threshold
+            - "0"
+            - --engine.memory-block-buffer-target
+            - "0"
+            - -vvv
+          ports:
+            - containerPort: 30303
+              protocol: TCP
+            - containerPort: 8545
+              protocol: TCP
+            - containerPort: 8546
+              protocol: TCP
+            - containerPort: 8551
+              protocol: TCP
+            - containerPort: 9090
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/genesis.json
+              name: genesis
+            - mountPath: /data/jwtsecret
+              name: jwtsecret
+            - mountPath: /data_reth
+              name: volume-el-data
+
+        # --- op-geth ---
+        - name: op-geth
+          image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.2-rc.5
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - geth init --datadir /data_opgeth --state.scheme hash /data/l2-genesis.json && exec geth --datadir /data_opgeth --verbosity 3 --http --http.corsdomain "*" --http.vhosts "*" --http.addr 0.0.0.0 --http.port 8547 --http.api web3,debug,eth,txpool,net,engine,miner --ws --ws.addr 0.0.0.0 --ws.port 8548 --ws.origins "*" --ws.api debug,eth,txpool,net,engine,miner --syncmode full --nodiscover --maxpeers 5 --rpc.allow-unprotected-txs --authrpc.addr 0.0.0.0 --authrpc.port 8552 --authrpc.vhosts "*" --authrpc.jwtsecret /data/jwtsecret --gcmode archive --state.scheme hash --port 30304 --nodekey /data/enode-key-1.txt --metrics --metrics.addr 0.0.0.0 --metrics.port 6062
+          ports:
+            - containerPort: 8547
+              protocol: TCP
+            - containerPort: 8548
+              protocol: TCP
+            - containerPort: 8552
+              protocol: TCP
+            - containerPort: 30304
+              protocol: TCP
+            - containerPort: 6062
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/l2-genesis.json
+              name: l2-genesis
+            - mountPath: /data/jwtsecret
+              name: jwtsecret
+            - mountPath: /data/enode-key-1.txt
+              name: enode-key
+            - mountPath: /data_opgeth
+              name: volume-op-geth-data
+
+        # --- op-node ---
+        - name: op-node
+          image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.0-rc.1
+          command:
+            - op-node
+          args:
+            - --l1
+            - http://127.0.0.1:8545  # EL HTTP
+            - --l1.beacon
+            - http://127.0.0.1:3500  # Beacon
+            - --l1.epoch-poll-interval
+            - 12s
+            - --l1.http-poll-interval
+            - 6s
+            - --l2
+            - http://127.0.0.1:8552  # op-geth authrpc
+            - --l2.jwt-secret
+            - /data/jwtsecret
+            - --sequencer.enabled
+            - --sequencer.l1-confs
+            - "0"
+            - --verifier.l1-confs
+            - "0"
+            - --p2p.sequencer.key
+            - 8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
+            - --rollup.config
+            - /data/rollup.json
+            - --rpc.addr
+            - 0.0.0.0
+            - --rpc.port
+            - "8549"
+            - --p2p.listen.ip
+            - 0.0.0.0
+            - --p2p.listen.tcp
+            - "9003"
+            - --p2p.listen.udp
+            - "9003"
+            - --p2p.scoring.peers
+            - light
+            - --p2p.ban.peers
+            - "true"
+            - --metrics.enabled
+            - --metrics.addr
+            - 0.0.0.0
+            - --metrics.port
+            - "7300"
+            - --pprof.enabled
+            - --rpc.enable-admin
+            - --safedb.path
+            - /data_db
+          ports:
+            - containerPort: 8549
+              protocol: TCP
+            - containerPort: 9003
+              protocol: TCP
+            - containerPort: 9003
+              protocol: UDP
+            - containerPort: 7300
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/jwtsecret
+              name: jwtsecret
+            - mountPath: /data/rollup.json
+              name: rollup-config
+            - mountPath: /data_db
+              name: volume-op-node-data
+
+        # --- op-batcher ---
+        - name: op-batcher
+          image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0-rc.1
+          command:
+            - op-batcher
+          args:
+            - --l1-eth-rpc
+            - http://127.0.0.1:8545
+            - --l2-eth-rpc
+            - http://127.0.0.1:8547  # op-geth HTTP
+            - --rollup-rpc
+            - http://127.0.0.1:8549  # op-node
+            - --max-channel-duration=2
+            - --sub-safety-margin=4
+            - --poll-interval=1s
+            - --num-confirmations=1
+            - --private-key=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
+          # No ports
+
+        # --- Validator ---
+        - name: validator
+          image: sigp/lighthouse:v7.0.0-beta.0
+          command:
+            - lighthouse
+          args:
+            - vc
+            - --datadir
+            - /data/validator
+            - --testnet-dir
+            - /data/testnet-dir
+            - --init-slashing-protection
+            - --beacon-nodes
+            - http://127.0.0.1:3500
+            - --suggested-fee-recipient
+            - 0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990
+            - --builder-proposals
+            - --prefer-builder-proposals
+          volumeMounts:
+            - mountPath: /data/testnet-dir
+              name: testnet
+            - mountPath: /data/validator
+              name: volume-validator-data
+
+      restartPolicy: Always
+
+      volumes:
+        - name: jwtsecret
+          hostPath:
+            path: /mnt/sceal/storage/jwtsecret
+            type: File
+        - name: testnet
+          hostPath:
+            path: /mnt/sceal/storage/testnet
+        - name: artifacts
+          hostPath:
+            path: /mnt/sceal/storage
+        - name: volume-beacon-data
+          hostPath:
+            path: /mnt/sceal/storage/volume-beacon-data
+        - name: genesis
+          hostPath:
+            path: /mnt/sceal/storage/genesis.json
+            type: File
+        - name: volume-el-data
+          hostPath:
+            path: /mnt/sceal/storage/volume-el-data
+        - name: l2-genesis
+          hostPath:
+            path: /mnt/sceal/storage/l2-genesis.json
+            type: File
+        - name: enode-key
+          hostPath:
+            path: /mnt/sceal/storage/enode-key-1.txt
+            type: File
+        - name: volume-op-geth-data
+          hostPath:
+            path: /mnt/sceal/storage/volume-op-geth-data
+        - name: rollup-config
+          hostPath:
+            path: /mnt/sceal/storage/rollup.json
+            type: File
+        - name: volume-op-node-data
+          hostPath:
+            path: /mnt/sceal/storage/volume-op-node-data
+        - name: volume-validator-data
+          hostPath:
+            path: /mnt/sceal/storage/data_validator
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unified-node
+  labels:
+    app: unified-node
+spec:
+  type: NodePort
+  selector:
+    app: unified-node
+  ports:
+    # Beacon
+    - name: beacon-udp
+      port: 9000
+      targetPort: 9000
+      protocol: UDP
+      nodePort: 30900
+    - name: beacon-tcp
+      port: 9001
+      targetPort: 9000
+      protocol: TCP
+      nodePort: 30901
+    - name: beacon-quic
+      port: 9100
+      targetPort: 9100
+      nodePort: 30910
+    - name: beacon-http
+      port: 3500
+      targetPort: 3500
+      nodePort: 30350
+
+    # EL (Reth) - uses standard ports
+    - name: el-rpc
+      port: 8545
+      targetPort: 8545
+      nodePort: 30545
+    - name: el-ws
+      port: 8546
+      targetPort: 8546
+      nodePort: 30546
+    - name: el-auth
+      port: 8551
+      targetPort: 8551
+      nodePort: 30551
+    - name: el-metrics
+      port: 9090
+      targetPort: 9090
+      nodePort: 30990
+
+    # op-geth - shifted ports
+    - name: op-geth-rpc
+      port: 8547
+      targetPort: 8547
+      nodePort: 30547
+    - name: op-geth-ws
+      port: 8548
+      targetPort: 8548
+      nodePort: 30548
+    - name: op-geth-auth
+      port: 8552
+      targetPort: 8552
+      nodePort: 30552
+    - name: op-geth-p2p
+      port: 30304
+      targetPort: 30304
+      nodePort: 30304
+    - name: op-geth-metrics
+      port: 6062
+      targetPort: 6062
+      nodePort: 30662
+
+    # op-node
+    - name: op-node-rpc
+      port: 8549
+      targetPort: 8549
+      nodePort: 30549
+    - name: op-node-p2p-tcp
+      port: 9003
+      targetPort: 9003
+      protocol: TCP
+      nodePort: 30903
+    - name: op-node-p2p-udp
+      port: 9031
+      targetPort: 9003
+      protocol: UDP
+      nodePort: 30904
+    - name: op-node-metrics
+      port: 7300
+      targetPort: 7300
+      nodePort: 30730

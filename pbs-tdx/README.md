@@ -79,4 +79,7 @@ k apply -f 00_opstack_rollup_boost.yaml -f 02_op-rbuilder_tdx.yaml -n tdx-vm-tes
 ```bash
 k apply -f testing.yaml -n tdx-vm-test
 ```
-
+- To delete all pods for a specific namespace and config file, do.
+```bash
+kubectl delete -f your-file.yaml -n <namespace>
+```

@@ -95,6 +95,8 @@ spec:
               name: beacon-testnet
             - mountPath: /artifacts
               name: beacon-artifacts
+            - mountPath: /data_beacon
+              name: beacon-volume
       restartPolicy: Always
       volumes:
         - hostPath:
@@ -107,6 +109,10 @@ spec:
         - hostPath:
             path: /mnt/sceal/storage
           name: beacon-artifacts
+        - hostPath:
+            path: /mnt/sceal/storage/volume-beacon-data
+          name: beacon-volume
+        
 
 ---
 apiVersion: v1
@@ -218,6 +224,8 @@ spec:
                 name: el-genesis
               - mountPath: /data/jwtsecret
                 name: el-jwtsecret
+              - mountPath: /data_reth
+                name: el-volume
       restartPolicy: Always
       volumes:
         - hostPath:
@@ -228,6 +236,9 @@ spec:
             path: /mnt/sceal/storage/jwtsecret
             type: File
           name: el-jwtsecret
+        - hostPath:
+            path: /mnt/sceal/storage/volume-el-data
+          name: el-volume
 
 ---
 apiVersion: v1
@@ -334,7 +345,7 @@ spec:
       containers:
         - args:
             - -c
-            - geth init --datadir /data_opgeth --state.scheme hash /data/l2-genesis.json && exec geth --datadir /data_opgeth --verbosity 3 --http --http.corsdomain "*" --http.vhosts "*" --http.addr 0.0.0.0 --http.port 8545 --http.api web3,debug,eth,txpool,net,engine,miner --ws --ws.addr 0.0.0.0 --ws.port 8546 --ws.origins "*" --ws.api debug,eth,txpool,net,engine,miner --syncmode full --nodiscover --maxpeers 5 --rpc.allow-unprotected-txs --authrpc.addr 0.0.0.0 --authrpc.port 8551 --authrpc.vhosts "*" --authrpc.jwtsecret /data/jwtsecret --gcmode archive --state.scheme hash --port 30303 --nodekey /data/enode-key-1.txt --metrics --metrics.addr 0.0.0.0 --metrics.port 6061
+            - geth init --datadir /data_opgeth --state.scheme hash /data/l2-genesis.json && exec geth --datadir /data_opgeth --verbosity 3 --http --http.corsdomain "*" --http.vhosts "*" --http.addr 0.0.0.0 --http.port 8545 --http.api web3,debug,eth,txpool,net,engine,miner --ws --ws.addr 0.0.0.0 --ws.port 8546 --ws.origins "*" --ws.api debug,eth,txpool,net,engine,miner --syncmode full --nodiscover --maxpeers 5 --rpc.allow-unprotected-txs --authrpc.addr 0.0.0.0 --authrpc.port 8551 --authrpc.vhosts "*" --authrpc.jwtsecret /data/jwtsecret --gcmode archive --state.scheme hash --port 30303 --nodekey /data/enode-key-1.txt --metrics 0.0.0.0:6061 
           command:
             - /bin/sh
           image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.2-rc.5
@@ -357,6 +368,8 @@ spec:
               name: op-geth-jwtsecret
             - mountPath: /data/enode-key-1.txt
               name: op-geth-enode-key
+            - mountPath: /data_opgeth
+              name: op-geth-volume
       restartPolicy: Always
       volumes:
         - hostPath:
@@ -371,6 +384,9 @@ spec:
             path: /mnt/sceal/storage/enode-key-1.txt
             type: File
           name: op-geth-enode-key
+        - hostPath:
+            path: /mnt/sceal/storage/volume-op-geth-data
+          name: op-geth-volume
 
 ---
 apiVersion: v1
@@ -578,60 +594,6 @@ spec:
       targetPort: 30303
   selector:
     l2.service: op-rbuilder
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
-    port.authrpc: "8551"
-    service: rollup-boost
-  labels:
-    l2.service: rollup-boost
-  name: rollup-boost
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      l2.service: rollup-boost
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      annotations:
-        port.authrpc: "8551"
-        service: rollup-boost
-      labels:
-        l2.service: rollup-boost
-    spec:
-      containers:
-        - args:
-            - --rpc-host
-            - 0.0.0.0
-            - --rpc-port
-            - "8551"
-            - --l2-jwt-path
-            - /data/jwtsecret
-            - --l2-url
-            - http://op-geth:8551
-            - --builder-jwt-path
-            - /data/jwtsecret
-            - --builder-url
-            - http://op-rbuilder:8551
-          image: docker.io/flashbots/rollup-boost:0.7.0
-          name: rollup-boost
-          ports:
-            - containerPort: 8551
-              protocol: TCP
-          volumeMounts:
-            - mountPath: /data/jwtsecret
-              name: rollup-boost-jwtsecret
-      restartPolicy: Always
-      volumes:
-        - hostPath:
-            path: /mnt/sceal/storage/jwtsecret
-            type: File
-          name: rollup-boost-jwtsecret
 
 ---
 apiVersion: v1

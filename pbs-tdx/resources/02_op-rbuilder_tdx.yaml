@@ -4,6 +4,60 @@ kind: Deployment
 metadata:
   annotations:
     port.authrpc: "8551"
+    service: rollup-boost
+  labels:
+    l2.service: rollup-boost
+  name: rollup-boost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      l2.service: rollup-boost
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        port.authrpc: "8551"
+        service: rollup-boost
+      labels:
+        l2.service: rollup-boost
+    spec:
+      containers:
+        - args:
+            - --rpc-host
+            - 0.0.0.0
+            - --rpc-port
+            - "8551"
+            - --l2-jwt-path
+            - /data/jwtsecret
+            - --l2-url
+            - http://op-geth:8551
+            - --builder-jwt-path
+            - /data/jwtsecret
+            - --builder-url
+            - http://op-rbuilder:8551
+          image: docker.io/flashbots/rollup-boost:0.7.0
+          name: rollup-boost
+          ports:
+            - containerPort: 8551
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/jwtsecret
+              name: rollup-boost-jwtsecret
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /mnt/sceal/storage/jwtsecret
+            type: File
+          name: rollup-boost-jwtsecret
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    port.authrpc: "8551"
     port.http: "8545"
     port.metrics: "9090"
     port.rpc: "30303"
@@ -29,6 +83,7 @@ spec:
       labels:
         l2.service: op-rbuilder
     spec:
+      runtimeClassName: kata-qemu-tdx
       containers:
         - args:
             - node

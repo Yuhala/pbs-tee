@@ -124,5 +124,4 @@ Running 30s test @ http://nginx-service:80/
   2446281 requests in 30.10s, 1.96GB read
 Requests/sec:  81277.48
 Transfer/sec:     66.82MB
-
 ```
