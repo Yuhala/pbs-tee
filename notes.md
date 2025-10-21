@@ -195,5 +195,32 @@ kubectl get runtimeclass -o name | grep kata | xargs -r kubectl delete
 ps aux | grep /opt/kata/bin/qemu-system-x86_64
 ```
 
+
+## Trouble VM networking issues
+- Steps to configure port forwarding in QEMU/KVM VMs
+- Get VM IP with `ip a`. Results should give some output like
+```bash
+...
+2: enp0s1: <BROADCAST,MULTICAST,UP,LOWER_UP> ...
+    inet 10.0.2.15/24 metric 100 brd 10.0.2.255 scope global dynamic enp0s1
+```
+This suggests the VM's IP address that is visible to the host system is `10.0.2.15. 
+
+
+
+### Using libvirt
+- List all VMs (not VM name)
+```bash
+virsh list --all
+```
+- Shutdown the VM
+```bash
+virsh shutdown vm-name
+```
+- Net config
+```bash
+hostfwd=tcp::8545-:8545, hostfwd=tcp::8547-:8547
+```
+
 ## Documentation
 - [Confidential containers explained](https://confidentialcontainers.org/blog/2024/12/03/confidential-containers-without-confidential-hardware/)

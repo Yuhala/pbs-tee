@@ -52,7 +52,7 @@ EOF
 # Generate seed image
 cloud-localds ${SEED_IMG} cloud-init/user-data cloud-init/meta-data
 
-echo "Booting VM with QEMU"
+echo "Booting Builder VM with QEMU"
 # Boot VM with QEMU
 sudo qemu-system-x86_64 \
   -enable-kvm \
@@ -62,10 +62,13 @@ sudo qemu-system-x86_64 \
   -smp ${CPUS} \
   -drive file=${CLOUD_IMG},format=qcow2 \
   -drive file=${SEED_IMG},format=raw \
-  -netdev bridge,id=net0,br=virbr0 \
+  -netdev user,id=net0,hostfwd=tcp::${SSH_PORT}-:22,hostfwd=tcp::8545-:8545,hostfwd=tcp::8547-:8547 \
   -device e1000,netdev=net0 \
   -nographic
 
 
   # login to VM with: ssh -p 2223 ubuntu@localhost
+  # with port fwd: ssh -L 8547:localhost:8547 -p 2223 ubuntu@localhost
+  # sudo apt-get purge needrestart
 
+#hostfwd=tcp::{ssh_port}-:22,hostfwd=tcp::8547-:8547,hostfwd=tcp::8545-:8545'

@@ -61,7 +61,7 @@ def do_clean():
         os.remove(pidfile)
 
 def add_vsock(cmd):
-    cmd.extend(['-device', 'vhost-vsock-pci,guest-cid=3'])
+    cmd.extend(['-device', 'vhost-vsock-pci,guest-cid=4'])
 
 def prepare_gpus(gpus):
     gpu_args = ','.join(gpus)

@@ -188,7 +188,7 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
 ```
 
 ## Benchmarking with contender
-[Contender]() is a tool provided by Flashbots used to simulate MEV/builder-client interactions. We can use it to benchmark and stress-test our local blockchain setup.
+[Contender](https://github.com/flashbots/contender) is a tool provided by Flashbots used to simulate MEV/builder-client interactions. We can use it to benchmark and stress-test our local blockchain setup.
 - Install Contender CLI
 ```bash
 sudo apt install libsqlite3-dev 
