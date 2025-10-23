@@ -5,3 +5,5 @@ uki.efi*
 vmlinuz*
 tokens/
 **/pyuhala-env/
+*.csv
+*.data

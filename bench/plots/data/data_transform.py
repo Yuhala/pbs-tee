@@ -34,14 +34,16 @@ def parse_data_file(filepath: str) -> Tuple[str, List[Dict]]:
     # Default to the filename base if the header is missing
     type_name = type_match.group(1).strip() if type_match else filepath.split('.')[0]
     
-    # 2. Define the Benchmark Regex Pattern
+    
+    # 2. Define the Benchmark Regex Pattern (MODIFIED)
+    # The key change is using (?:$|\[) to look ahead for either the END of the string
+    # or the start of the next benchmark, making the last one always match.
     benchmark_pattern = re.compile(
-        r'^\[(.*?)\]\s*\n'                                # Capture benchmark name [1]
-        r'const\s+(.*?)\s*=\s*(\[.*?\])\s*;?\s*\n'         # Capture x_var_name [2] and x_array [3]
-        r'const\s+.*?\s*=\s*(\[.*?\])\s*;?\s*\n',          # Capture y_array [4]
+        r'^\[(.*?)\]\s*\n'                                      # Capture benchmark name [1]
+        r'const\s+(.*?)\s*=\s*(\[.*?\])\s*;?\s*\n'             # Capture x_var_name [2] and x_array [3]
+        r'const\s+.*?\s*=\s*(\[.*?\])\s*;?\s*(?:\s*|#|$)',     # Capture y_array [4], allow trailing content/EOF
         re.MULTILINE | re.DOTALL
     )
-
     benchmarks_data = []
     
     # 3. Iterate through all matches
