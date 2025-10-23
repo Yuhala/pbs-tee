@@ -20,6 +20,28 @@ CONTENDER_CMD = [
     "fill-block"   
     
 ]
+#contender setup scenario:stress.toml -r $RPC_URL
+CONTENDER_SETUP_SCENARIO = [
+    "contender",
+    "setup",
+    "scenario:stress.toml",
+    "-r", RPC_URL,
+   
+    
+]
+
+
+#contender spam  scenario:stress.toml -r $RPC_URL --tps 10 -d 3
+CONTENDER_RUN_SCENARIO = [
+    "contender",
+    "spam",
+    "scenario:stress.toml",
+    "--tps", str(TPS),
+    "--min-balance", str(MIN_BALANCE),
+    "-r", RPC_URL,
+    "-d", str(DURATION)  
+    
+]
 
 RESET_CONTENDER_DB = [
     "contender",
@@ -45,14 +67,27 @@ def run_cmd(cmd, sudo=False, wait=True):
     return proc  # caller will handle async processes
 
 
-def main():
-    
-    print("\n=== Running Contender spammer ===")
+def run_contender_test():
+    print("\n=== Running Contender test ===")
     try:
         run_cmd(RESET_CONTENDER_DB)
         run_cmd(CONTENDER_CMD)
     except KeyboardInterrupt:
         print("\n[!] Interrupted, shutting down...")
+        
+
+def run_contender_scenario():
+    print("\n=== Running Contender scenario bench ===")
+    try:
+        run_cmd(RESET_CONTENDER_DB)
+        run_cmd(CONTENDER_SETUP_SCENARIO)
+        run_cmd(CONTENDER_RUN_SCENARIO)
+    except KeyboardInterrupt:
+        print("\n[!] Interrupted, shutting down...")
+
+
+def main():
+    run_contender_scenario()   
   
 
     print("\n ---- Contender done -----.")
