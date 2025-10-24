@@ -4,9 +4,11 @@ import os
 import sys
 import time
 
+PORT = 8547
+
 TPS = 10
 #RPC_URL = "http://localhost:8555" # non VM localhost
-RPC_URL = "http://localhost:8547" 
+RPC_URL = "http://10.169.79.161:"+str(PORT) 
 DURATION = 5
 MIN_BALANCE = "0.05 ETH"
 # --- Configuration ---
@@ -87,8 +89,8 @@ def run_contender_scenario():
 
 
 def main():
-    run_contender_scenario()   
-    #run_contender_test()
+    #run_contender_scenario()   
+    run_contender_test()
 
     print("\n ---- Contender done -----.")
 

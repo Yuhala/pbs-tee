@@ -5,9 +5,13 @@
 # sudo snap install multipass
 # sudo apt install jq -y
 
+#
 # Connect to VM with
+# Create VM with: sudo ./run_devnet_vm.sh
 # sudo multipass authenticate --> enter passphrase
 # sudo multipass shell builder-vm
+# sudo multipass list
+#
 
 
 set -e
@@ -23,7 +27,8 @@ multipass launch noble \
   --name "$VM_NAME" \
   --cpus ${CPUS} \
   --memory ${RAM_GB} \
-  --disk 30G
+  --disk 30G \
+
 
 echo "Forwarding host port $PORT → VM port $PORT..."
 pkill -f "ssh.*multipass.*$PORT" 2>/dev/null || true

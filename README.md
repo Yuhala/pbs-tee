@@ -21,10 +21,19 @@ sudo apt install golang-go -y
 go version # check go version
 ```
 
+- Install Docker using convenience script
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh --dry-run # shows which instructions are run by the script
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER # logout and back
+```
+
+
 - Now spin up the L1 + L2 (sequencer + proposer) stack using builder-playground, specifying the RPC endpoint throughwhich the builder will be reached. A rollup-boost instance is (automaticall) lauched by the `cook` command. When sequencer receives `engine_FCU`, Rollup‑Boost mirrors it to the builder; upon `engine_getPayload`, collects the builder block, validates it, and feeds it back to the sequencer if valid. 
 
 ```bash
-git clone https://github.com/Yuhala/vm-playground.git && cd vm-playground
+git clone https://github.com/Yuhala/pbs-tee.git && cd pbs-tee
 cd builder-playground
 go build -o builder-playground . # build builder-playground or use "go run main.go" in the next command
 ./builder-playground cook opstack --external-builder http://host:8555
