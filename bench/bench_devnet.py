@@ -6,11 +6,11 @@ import time
 
 PORT = 8547
 
-TPS = 10
+TPS = 5
 #RPC_URL = "http://localhost:8555" # non VM localhost
-RPC_URL = "htt://10.169.79.236:8547"
+RPC_URL = "http://localhost:8547"
 DURATION = 5
-MIN_BALANCE = "0.05 ETH"
+MIN_BALANCE = "0.1ETH"
 # --- Configuration ---
 CONTENDER_CMD = [
     "contender",

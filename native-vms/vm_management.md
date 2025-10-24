@@ -38,5 +38,8 @@ multipass unmount <vm-name>:/path/in/vm
 ```
 7. Port forwarding 
 ```bash
+#1. add host ssh pub key to VM's authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
 ssh -L 8547:127.0.0.1:8547 ubuntu@$(multipass info devnet-vm | grep IPv4 | awk '{print $2}')
 ```
