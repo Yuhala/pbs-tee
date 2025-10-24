@@ -1,6 +1,7 @@
 #!/bin/bash
 
-HOST_IP=127.0.0.1
+#HOST_IP=127.0.0.1 
+HOST_IP=10.169.79.236
 
 git clone https://github.com/flashbots/op-rbuilder.git
 cd op-rbuilder
@@ -8,9 +9,9 @@ cd op-rbuilder
 rm -rf ~/.local/share/reth
 # run op-rbuilder
 cargo run -p op-rbuilder --bin op-rbuilder -- node \
-    --chain $L2_GENESIS \
+    --chain $HOME/l2-genesis.json \
     --http --http.port 2222 \
-    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $JWT_SECRET \
+    --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $HOME/jwtsecret \
     --port 30333 --disable-discovery \
     --metrics 0.0.0.0:9011 \
     --rollup.builder-secret-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \

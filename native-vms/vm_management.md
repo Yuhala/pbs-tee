@@ -43,3 +43,11 @@ chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ssh -L 8547:127.0.0.1:8547 ubuntu@$(multipass info devnet-vm | grep IPv4 | awk '{print $2}')
 ```
+
+## Copying devnet files
+```bash
+multipass transfer devnet-vm:/home/ubuntu/.playground/devnet/jwtsecret .
+multipass transfer devnet-vm:/home/ubuntu/.playground/devnet/l2-genesis.json .
+multipass transfer jwtsecret builder-vm:/home/ubuntu/
+multipass transfer l2-genesis.json builder-vm:/home/ubuntu/
+```

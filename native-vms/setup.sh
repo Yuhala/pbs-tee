@@ -1,6 +1,8 @@
 #!/bin/bash
 sudo apt update
 sudo apt install curl build-essential pkg-config libssl-dev -y
+sudo apt install build-essential clang libclang-dev
+
 curl https://sh.rustup.rs -sSf | sh
 source $HOME/.cargo/env
 cargo --version
