@@ -14,7 +14,8 @@ multipass launch noble \
   --name "$VM_NAME" \
   --cpus ${CPUS} \
   --memory ${RAM_GB} \
-  --disk 30G 
+  --disk 30G \
+  --network mpqemubr0 #verify which multipass bridge to use with multipass networks
 
 echo "Forwarding host port $PORT → VM port $PORT..."
 # Multipass doesn't support native port forwarding, so we set up an SSH tunnel in the background

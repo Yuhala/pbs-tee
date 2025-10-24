@@ -36,3 +36,7 @@ multipass mount /path/on/host <vm-name>:/path/in/vm
 # unmount
 multipass unmount <vm-name>:/path/in/vm
 ```
+7. Port forwarding 
+```bash
+ssh -L 8547:127.0.0.1:8547 ubuntu@$(multipass info devnet-vm | grep IPv4 | awk '{print $2}')
+```

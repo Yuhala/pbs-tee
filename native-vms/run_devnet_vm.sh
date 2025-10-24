@@ -28,6 +28,7 @@ multipass launch noble \
   --cpus ${CPUS} \
   --memory ${RAM_GB} \
   --disk 30G \
+  --network mpqemubr0 #verify which multipass bridge to use with multipass networks
 
 
 echo "Forwarding host port $PORT → VM port $PORT..."
