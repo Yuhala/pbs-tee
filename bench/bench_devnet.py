@@ -88,7 +88,7 @@ def run_contender_scenario():
 
 def main():
     run_contender_scenario()   
-  
+    #run_contender_test()
 
     print("\n ---- Contender done -----.")
 
