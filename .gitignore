@@ -3,6 +3,8 @@
 initrd*
 uki.efi*
 vmlinuz*
+*.csv
+*.data
+**/notes/
 tokens/
 **/pyuhala-env/
-**/notes/
