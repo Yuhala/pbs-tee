@@ -224,3 +224,45 @@ hostfwd=tcp::8545-:8545, hostfwd=tcp::8547-:8547
 
 ## Documentation
 - [Confidential containers explained](https://confidentialcontainers.org/blog/2024/12/03/confidential-containers-without-confidential-hardware/)
+
+
+## Contender benchmarking
+
+[Contender](https://github.com/flashbots/contender) is a tool provided by Flashbots used to simulate MEV/builder-client interactions. We can use it to benchmark and stress-test our local blockchain setup.
+- Install Contender CLI
+```bash
+sudo apt install libsqlite3-dev 
+RUSTFLAGS="--cfg tokio_unstable" cargo install --git https://github.com/flashbots/contender --bin contender
+```
+- Send some transactions to the builder. Observe the output from op-rbuilder.
+```bash
+contender spam --tpb 50 -r <builder endpoint> fill-block
+# Example: contender spam --tpb 50 -r http://192.168.122.100:4444 fill-block
+```
+```bash
+contender spam scenario:stress.toml \
+  -r http://localhost:8545 \
+  --auth http://192.168.122.100:4444 \
+  --jwt ~/.playground/devnet/jwtsecret \
+  --fcu \
+  --op \
+  --tps 200 -d 2 -w 3
+```
+- See [Contender Readme](https://github.com/flashbots/contender/blob/main/README.md) for more examples and options.
+
+contender spam scenario:stress.toml \
+  -r http://localhost:8545 \
+  --auth http://192.168.122.100:4444 \
+  --jwt ~/.playground/devnet/jwtsecret \
+  --fcu \
+  --op \
+  --tps 200 -d 2 -w 3
+
+## Testing smart contract deployment (optional)
+- See this 
+
+## Viewing metrics
+- The builder playground output specifies Prometheus metrics can be obtained at port `7300`. To view from a local PC, SSH as follows:
+```bash
+ssh -L <port>:localhost:<port> <username@remote-hostname>
+```
