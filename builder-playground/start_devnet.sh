@@ -18,7 +18,7 @@ fi
 # --- Main Build and Run ---
 
 # Run the devnet setup (uses the locally built binary)
-./builder-playground cook opstack
+sudo ./builder-playground cook opstack
 
 # ----------------------------------------------------------------------------------
 # TODO: Automatically retrieve the IP address for the external-builder flag

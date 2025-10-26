@@ -375,9 +375,8 @@ func (o *OpGeth) Run(service *Service, ctx *ExContext) {
 		WithVolume("data", "/data_opgeth").
 		WithArtifact("/data/l2-genesis.json", "l2-genesis.json").
 		WithArtifact("/data/jwtsecret", "jwtsecret").
-		WithArtifact("/data/p2p_key.txt", o.Enode.Artifact).
-		WithPort("http", 8547).
-		WithPort("http", 8545)
+		WithArtifact("/data/p2p_key.txt", o.Enode.Artifact)
+		
 }
 
 func (o *OpGeth) Name() string {
