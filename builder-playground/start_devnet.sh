@@ -5,24 +5,17 @@
 #
 
 
-#!/bin/bash
-
-# --- Conditional Cleanup ---
-
-# Check if the first parameter ($1) is NOT "new".
-# If it's anything else (or empty), perform the cleanup.
-if [ "$1" != "new" ]; then
-    echo "No 'new' parameter detected. Removing old devnet files..."
+if [ "$1" == "new" ]; then
+    echo "Creating new devnet; removing old devnet files..."
     rm -rf ~/.local/share/reth
     sudo rm -rf ~/.playground
+    # Rebuild the binary
+    go build -o builder-playground .
 else
-    echo "Parameter 'new' detected. Skipping file removal."
+    echo "Restarting devnet from previous state."
 fi
 
 # --- Main Build and Run ---
-
-# Rebuild the binary
-go build -o builder-playground .
 
 # Run the devnet setup (uses the locally built binary)
 ./builder-playground cook opstack
