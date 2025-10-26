@@ -42,6 +42,7 @@ multipass unmount <vm-name>:/path/in/vm
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ssh -L 8547:127.0.0.1:8547 ubuntu@$(multipass info devnet-vm | grep IPv4 | awk '{print $2}')
+ssh -L 8547:127.0.0.1:8547 -L 6061:127.0.0.1:6061 -L 9090:127.0.0.1:9090 ubuntu@$(multipass info devnet-vm | grep IPv4 | awk '{print $2}')
 ```
 
 ## Copying devnet files

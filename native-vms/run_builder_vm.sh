@@ -1,6 +1,20 @@
 #!/bin/bash
 # Builds the builder VM and forwards port 4444 to host
 
+
+# Prerequisites
+# sudo snap install multipass
+# sudo apt install jq -y
+
+#
+# Connect to VM with
+# Create VM with: sudo ./run_devnet_vm.sh
+# sudo multipass authenticate --> enter passphrase
+# sudo multipass shell builder-vm
+# sudo multipass list
+#
+
+
 set -e
 
 VM_NAME="builder-vm"

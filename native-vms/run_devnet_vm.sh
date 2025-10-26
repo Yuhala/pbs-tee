@@ -9,7 +9,7 @@
 # Connect to VM with
 # Create VM with: sudo ./run_devnet_vm.sh
 # sudo multipass authenticate --> enter passphrase
-# sudo multipass shell builder-vm
+# sudo multipass shell devnet-vm
 # sudo multipass list
 #
 
