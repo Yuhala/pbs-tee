@@ -54,11 +54,11 @@ set xtics offset 0.4,0.4,0
 set ytics offset 0.5,0,0
 set xlabel offset 0,1,0
 
-dx=0.14
+dx=0.12
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 #set xrange[0:400]
-set yrange [0:15]
+set yrange [0:3500]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
@@ -74,10 +74,10 @@ plot 'data/nopbs-native/tti.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 l
 unset xtics
 eval mpNext
 # --- GRAPH b (top right)
-#set xrange[0:400]
+set xrange[0:20]
 
 
-set yrange [0:15]
+set yrange [0:2000]
 set title "Pending TXs" font "Helvetica-bold,12" #offset 0,-0.2
 
 set ylabel "Num. of pending TXs" font ",16"  offset 2.5,0
@@ -91,7 +91,7 @@ plot 'data/nopbs-native/pending_tx.csv' u 1:3 t "no-pbs-native" w lp ls 2006, \
      'data/nopbs-tee/pending_tx.csv' u 1:3 t "no-pbs-TEE" w lp ls 2007, \
      'data/pbs-native/pending_tx.csv' u 1:3 t "pbs-native" w lp ls 22004   
 
-
+unset xrange
 eval mpNext
 # --- GRAPH bottom left
 
@@ -121,20 +121,20 @@ plot 'data/nopbs-native/gas_per_block.csv' u 1:3 t "no-pbs-native" w lp ls 2006,
 
 eval mpNext
 # --- GRAPH: bottom right
-set yrange [0:40]
+set yrange [0:6000]
 unset xtics
 
 set style fill solid border -1
 set boxwidth 0.25
 
-set xtics("44k-48k" 1, "56k-60k" 2, "5.2M-5.2M" 3, "6.0M-6.0M" 4) offset 0,0.3,0 font ",12"
+set xtics("44k-48k" 1, "56k-60k" 2, "60k - 64k" 3, "5.2M - 5.2M" 4, "6.0M-6.0M" 5) offset 0,0.3,0 font ",12"
 #set xtics rotate by 45
 
 set title "TX gas used" font "Helvetica-bold,12" #offset 0,-0.2
 
 set ylabel "Num. of TXs" font ",16"  offset 2.5,0
 set xlabel "Gas used" font ",16"
-dx=0.15
+dx=0.14
 
 #set label "min = 1μs" at graph 0.6,0.9 font ",16"
 #set label "avg = 2^{48}μs" at graph 0.6,0.78 font ",16"
