@@ -4,6 +4,7 @@
 # otherwise, it just starts the devnet with the previous state
 #
 
+BUILDER_IP=10.169.79.167
 
 if [ "$1" == "new" ]; then
     echo "Creating new devnet; removing old devnet files..."
@@ -31,7 +32,7 @@ sudo ./builder-playground cook opstack
 # echo "Automatically detected HOST_IP: $HOST_IP"
 
 # To use this IP with the external builder, uncomment the line below:
-# ./builder-playground cook opstack --external-builder http://${HOST_IP}:4444
+# ./builder-playground cook opstack --external-builder http://${BUILDER_IP}:4444
 
 
 

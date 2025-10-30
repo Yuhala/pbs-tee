@@ -10,7 +10,7 @@ rm -rf ~/.local/share/reth
 # run op-rbuilder
 cargo run -p op-rbuilder --bin op-rbuilder -- node \
     --chain $HOME/l2-genesis.json \
-    --http --http.port 2222 \
+    --http --http.port 2222 --http.addr 0.0.0.0 \
     --authrpc.addr 0.0.0.0 --authrpc.port 4444 --authrpc.jwtsecret $HOME/jwtsecret \
     --port 30333 --disable-discovery \
     --metrics 0.0.0.0:9011 \

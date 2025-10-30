@@ -115,7 +115,7 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
 - To setup and run all components using Kubernetes (can be done on a regular host or TDX VM), see [this Readme](pbs-tdx/README.md). Note that this is a little different from Claudiu's setup in that we don't use Kata to spin up pods running in a VM. However, we adapt Claudiu's kubernetes configurations to simply run regular pods.
 
 ## Part II: L1 + L2 stack and builder on separate machines or VMs
-Here we will spin up the L1 + L2 stack on the host machine and run the builder in a VM (TDX enabled or not). The `pbs-tee/native-vms` folder contains scripts used to build and launch such VMs using the `multipass` tool.
+Here we will spin up the L1 + L2 in VMs (TDX enabled or not). The `pbs-tee/native-vms` folder contains scripts used to build and launch such VMs using the `multipass` tool.
 - To build a VM (e.g., the `devnet-vm`), run the script `run_devnet_vm.sh`. This will build a VM called `devnet-vm` where you can run the monolythic sequencer. Another script called `run_builder_vm.sh` can be run to build a VM which will run the L2 builder component `op-rbuilder`. We note that these scripts do not (yet) run these componenents and so can be easily modified to run just a regular VM. Nevertheless, their names simply specify what they are meant to run.
 - To launch the devnet VM using multipass, do:
 ```bash
@@ -166,7 +166,7 @@ Run the script with `python3 bench_devnet.py`. The script can be modified to sen
 
 
 ## Using external builder
-This design employs [proposer builder separation]() as explained in our [OPODIS paper](docs/opodis-paper.pdf). Practically speaking, it allows us to point our devnet created above to an external component responsible for building blocks. We integrate this component in a separate VM.
+This design employs [proposer builder separation]() as explained in our [OPODIS paper](docs/opodis-paper.pdf). Practically speaking, it allows us to point our devnet created above to an external component responsible for building blocks. We integrate this component in a separate VM. 
 - To build the builder VM, run `./run_builder.vm`. Similarly, SSH into this VM with:
 ```bash
 multipass shell builder-vm
@@ -177,6 +177,8 @@ git clone https://github.com/Yuhala/pbs-tee.git && cd pbs-tee
 cd native-vms
 ./setup.sh
 ```
+- Obtain the builder VM's IP via `multipass list` and update the `BUILDER_IP` variable in the `start_devnet.sh` script to use this IP. Also, use the `--external-builder` option to run the devnet. Save an run the script.
+
 - The builder script: `builder-playground/start_builder.sh` contains the commands to clone, build and start Flashbot's external block builder `op-rbuilder`. Before running the script, we need to copy `l2-genesis.json` file and `jwtsecret` from the devnet VM to this VM. To do this, we have provided some scripts which can be run from the host to first pull these files from the devnet VM, and then push them to the builder-vm. In the host machine do this:
 ```bash
 cd pbs-tee/native-vms
