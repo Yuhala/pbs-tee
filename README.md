@@ -28,7 +28,7 @@ sudo sh ./get-docker.sh --dry-run # shows which instructions are run by the scri
 sudo sh get-docker.sh
 sudo usermod -aG docker $USER # logout and back
 ```
-
+Note: the script [setup.sh](native-vms/setup.sh) does all the above.
 
 - Now spin up the L1 + L2 (sequencer + proposer) stack using builder-playground, specifying the RPC endpoint throughwhich the builder will be reached. A rollup-boost instance is (automaticall) lauched by the `cook` command. When sequencer receives `engine_FCU`, Rollup‑Boost mirrors it to the builder; upon `engine_getPayload`, collects the builder block, validates it, and feeds it back to the sequencer if valid. 
 
@@ -63,11 +63,7 @@ go build -o builder-playground . # build builder-playground or use "go run main.
 		},
 ```
 - The private key used by the batcher to sign transactions in L2 can be found in the file `~/.playground/devnet/docker-compose.yaml`
-
-- Query the testnet with some curl instructions by running the `test-query.sh` script.
-```bash
-./test-query.sh
-```
+- To test the setup, you can use Contender to generate some transactions. See this section: [Benchmarking with contender](#benchmarking-with-contender).
 
 ## Integrating an external builder
 - Rollup-Boost serves as a relay between your L2 stack and an external block builder, [Flashbot's op-rbuilder](https://github.com/flashbots/op-rbuilder.git) in this case.
@@ -112,7 +108,8 @@ cargo run -p op-rbuilder --bin op-rbuilder -- node \
 ```
 
 ## Kubernetes based setup
-- To setup and run all components using Kubernetes (can be done on a regular host or TDX VM), see [this Readme](pbs-tdx/README.md). Note that this is a little different from Claudiu's setup in that we don't use Kata to spin up pods running in a VM. However, we adapt Claudiu's kubernetes configurations to simply run regular pods.
+- See [Claudiu's pod-based setup here](https://github.com/cbarbieru/builder-playground-opstack-k8s)
+<!--To setup and run all components using Kubernetes (can be done on a regular host or TDX VM), see [this Readme](pbs-tdx/README.md). Note that this is a little different from Claudiu's setup in that we don't use Kata to spin up pods running in a VM. However, we adapt Claudiu's kubernetes configurations to simply run regular pods.-->
 
 ## Part II: L1 + L2 stack and builder on separate machines or VMs
 Here we will spin up the L1 + L2 in VMs (TDX enabled or not). The `pbs-tee/native-vms` folder contains scripts used to build and launch such VMs using the `multipass` tool.

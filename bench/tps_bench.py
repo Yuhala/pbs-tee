@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 
+import os
+import random
 import time
 import csv
-import random
 import matplotlib.pyplot as plt
 from web3 import Web3
 from eth_account import Account
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 
-# --------------------------
-# CONFIGURATION
-# --------------------------
-RPC_URL = "http://localhost:8545"   # for builder playground this is the op-geth http port
-DURATION = 5                             # total benchmark time (seconds)
-TX_RATE = 5                               # transactions per second
+
+# configuration
+RPC_URL = "http://localhost:8545" #check op-geth http port from devnet
+DURATION = 60             # total benchmark duration (seconds)
+TX_RATE = 20              # transactions per second
+CLIENT_THREADS = 8       # number of parallel client threads
 CSV_FILE = "tps_results.csv"
 PLOT_FILE = "tps_plot.png"
 
@@ -24,22 +26,36 @@ RECEIVER_ADDRESS = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
 SENDER = Web3.to_checksum_address(SENDER_ADDRESS)
 RECEIVER = Web3.to_checksum_address(RECEIVER_ADDRESS)
 
-
-# web3 connection
+# Web3 connection
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
-assert w3.is_connected(), "Cannot connect to L2 RPC endpoint!"
+assert w3.is_connected(), "Cannot connect to RPC endpoint."
+
 print(f"Connected to chain id: {w3.eth.chain_id}")
 
 sender_account = Account.from_key(PRIVATE_KEY)
 sender = sender_account.address
-print(f"Sender: {sender}")
+print(f"Sender: {sender}") ## this is the same as SENDER_ADDRESS above
+
+#os._exit(0)
+
+# Thread-safe global nonce
+nonce_lock = Lock()
+global_nonce = w3.eth.get_transaction_count(sender)
 
 
-def send_tx(nonce):
+def get_next_nonce():
+    global global_nonce
+    with nonce_lock:
+        n = global_nonce
+        global_nonce += 1
+    return n
+
+
+def send_tx(nonce, gas):
     """Send a simple ETH transfer transaction."""
     tx = {
-        "to": RECEIVER_ADDRESS,
-        "value": w3.to_wei(0.00001, "ether"),
+        "to": RECEIVER,
+        "value": w3.to_wei(gas, "ether"),
         "gas": 21000,
         "maxFeePerGas": w3.to_wei("0.001", "gwei"),
         "maxPriorityFeePerGas": w3.to_wei("0.001", "gwei"),
@@ -48,47 +64,47 @@ def send_tx(nonce):
         "type": 2,
     }
     signed_tx = w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     return tx_hash.hex()
 
 
-print(f"\nStarting TPS benchmark for {DURATION}s at {TX_RATE} tx/s...\n")
+print(f"\nStarting TPS benchmark for {DURATION} seconds at {TX_RATE} tx/s\n")
 
 start_time = time.time()
 tps_log = []
-nonce = w3.eth.get_transaction_count(sender)
 
-# Thread pool for parallel TX submission
-with ThreadPoolExecutor(max_workers=TX_RATE * 2) as executor:
+with ThreadPoolExecutor(max_workers=CLIENT_THREADS) as executor:
     for second in range(DURATION):
         second_start = time.time()
-        tx_hashes = []
+        tx_futures = []
 
         # Submit TX_RATE transactions for this second
         for i in range(TX_RATE):
-            tx_hashes.append(executor.submit(send_tx, nonce))
-            nonce += 1
+            tx_nonce = get_next_nonce()
+            gas = 0.00001 + random.random() * 1e-8 # used to vary the gas value
+            future = executor.submit(send_tx, tx_nonce, gas)
+            tx_futures.append(future)
 
-        # Wait for all TXs in this second
         sent_tx = 0
-        for future in as_completed(tx_hashes):
+        for future in as_completed(tx_futures):
             try:
                 _ = future.result()
                 sent_tx += 1
             except Exception as e:
                 print(f"TX failed: {e}")
 
-        elapsed = time.time() - start_time
+        # Compute TPS for the second
         tps = sent_tx / (time.time() - second_start)
         tps_log.append((second + 1, tps))
+
         print(f"Second {second+1}: {sent_tx} TXs sent | TPS = {tps:.2f}")
 
-        # Sleep to maintain TX_RATE
+        # Maintain timing
         delay = 1.0 - (time.time() - second_start)
         if delay > 0:
             time.sleep(delay)
 
-# save in csv file
+# Save CSV file
 with open(CSV_FILE, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["id", "time_sec", "tps"])
@@ -97,13 +113,13 @@ with open(CSV_FILE, "w", newline="") as f:
 
 print(f"\nTPS data saved to {CSV_FILE}")
 
-# plotting
+# Plot results
 times = [t for t, _ in tps_log]
 tps_values = [v for _, v in tps_log]
 
 plt.figure(figsize=(8, 4))
 plt.plot(times, tps_values, marker="o", label="TPS per second")
-plt.title("L2 Transaction Throughput Benchmark")
+plt.title("Transaction Throughput Benchmark")
 plt.xlabel("Time (seconds)")
 plt.ylabel("Transactions per Second (TPS)")
 plt.grid(True)
@@ -111,4 +127,5 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(PLOT_FILE)
 print(f"Plot saved to {PLOT_FILE}")
+
 plt.show()
