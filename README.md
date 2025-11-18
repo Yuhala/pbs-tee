@@ -151,6 +151,8 @@ To access the ports in several VMs, we will need to do some port-forwarding. See
 ```bash
 ./port-forward.sh devnet-vm
 ```
+- In case you have `Permission denied (publickey)` during port-forwarding, manually add the host server's SSH public key into the `.ssh/authorized_keys` file of the VM in question and redo the port-forwarding. 
+
 
 ### Sending transactions to the devnet
 We can use contender (see next section) or write custom Python scripts. See the `bench` folder for examples of Python scripts. 

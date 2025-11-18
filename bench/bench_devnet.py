@@ -4,13 +4,13 @@ import os
 import sys
 import time
 
-PORT = 2222
+PORT = 8545
 #RPC_URL = "http://localhost:8555" # non VM localhost
 RPC_URL = "http://localhost:" + str(PORT)
 
 
 TPS = 10
-DURATION = 10
+DURATION = 5
 
 MIN_BALANCE = "0.1eth"
 # --- Configuration ---
