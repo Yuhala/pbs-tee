@@ -132,6 +132,7 @@ cd native-vms
 The `devnet-vm` builds and runs the main local devnet. To launch this devnet, do:
 ```bash
 cd pbs-tee/builder-playground
+go build -o builder-playground . # build builder-playground
 ./start_devnet new # to run a new devnet
 ./start_devnet # run existing devnet using existing state files in ~/.playground
 ```
@@ -145,6 +146,14 @@ Once the devnet is running (in the VM), you should have a similar output like be
 - op-node (http: 8549/8549, metrics: 7300/7300, p2p: 9003/9003, p2p: 9003/9004/udp)
 - op-batcher ()
 ```
+### Portforwarding
+To access the ports in several VMs, we will need to do some port-forwarding. See the script [port-forward.sh](native-vms/port_forward.sh). Take note of the ports of interest, e.g., the op-geth http port used by the devnet, it seems to change across runs. This will be used in the RPC URL to which transactions will be sent. Add a port-forwarding rule in the `PORT_FORWARDS` variable. Once this is done run the script with the VM's name.
+```bash
+./port-forward.sh devnet-vm
+```
+
+### Sending transactions to the devnet
+We can use contender (see next section) or write custom Python scripts. See the `bench` folder for examples of Python scripts. 
 
 ### Benchmarking with contender
 [Contender](https://github.com/flashbots/contender) is a tool provided by Flashbots used to simulate MEV/builder-client interactions. We can use it to benchmark and stress-test our local blockchain setup.
