@@ -45,7 +45,7 @@ set xlabel "Client load (Tx/s)" font ",16"
 set xtics font ",14"
 
 
-#set xtics("5" 0, "10" 1, "20" 2, "25" 3, "50" 4, "100" 5, "200" 6, "400" 7, "800" 8, "1000" 9, "1600" 10, "2000" 11) font ",10"
+set xtics("5" 0, "10" 1, "20" 2, "25" 3, "50" 4, "100" 5, "200" 6, "400" 7, "800" 8, "1000" 9, "1600" 10, "2000" 11) font ",10"
 #set xtics rotate by 60
 
 set style fill solid border -1
@@ -68,9 +68,9 @@ set key samplen 0.1 maxrows 2 at graph 0.5, 0.95 center font ",14"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/tps/nopbs-native.csv' u 2:3 t "no-pbs-native" w lp ls 2006, \
-     'data/tps/nopbs-tdx.csv' u 2:3 t "no-pbs-TEE" w lp ls 2007, \
-     'data/tps/pbs-native.csv' u 2:3 t "pbs-native" w lp ls 22004   
+plot 'data/tps/nopbs-native.csv' u 1:3 t "no-pbs-native" w lp ls 2006, \
+     'data/tps/nopbs-tdx.csv' u 1:3 t "no-pbs-TEE" w lp ls 2007, \
+     'data/tps/pbs-native.csv' u 1:3 t "pbs-native" w lp ls 22004   
 
      
 !epstopdf "load_tps.eps"
