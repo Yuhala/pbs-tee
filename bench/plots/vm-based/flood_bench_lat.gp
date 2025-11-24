@@ -25,7 +25,6 @@ load "linetypes.gnuplot"
 # 8. eth_getTransactionReceipt: returns receipt for a mined Tx
 
 
-
 ## Variables
 mp_startx=0.15
 mp_starty=0.08
@@ -41,19 +40,16 @@ mp_rowgap=0.07
 mp_colgap=0.08
 mp_width=0.8
 
-
 eval mpSetup(2,4)
 
 set ytics nomirror
 set grid y
 set ytics font ",12"
 
-
 eval mpNext
 # --- GRAPH a (top left)
 
-
-set ylabel "Median latency (s)" font ",14"  offset -12,0
+set ylabel "Median latency (s)" font ",12"  offset -12,0
 set xlabel "Requests per second" font ",10"  offset 1.25,-0.5
 set xtics font ",10"
 set ytics font ",10"
@@ -73,7 +69,7 @@ dx=0.12
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 #set xrange[0:400]
-set yrange [0:0.015]
+set yrange [0:0.016]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.0,1.2 font ",12"
@@ -81,23 +77,21 @@ set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.0,1.2 font ",12"
 
 #set key samplen 0.1 maxrows 2 at graph 0.5, 0.95 center font ",14"
 
-set title "eth-call" font "Helvetica-bold,10" offset 0,-0.75
+set title "eth-call" font "Helvetica-bold,10" offset 0,-0.6
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_call.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004, \
-     'data/flood/pbs-tee/data.csv' u 2:11 t "pbs-native" w lp ls 2009
+     'data/flood/pbs-tee/xx.csv' u 2:11 t "pbs-TEE" w lp ls 2000
      
-
 eval mpNext
 
 unset key
 set title "eth-getBalance" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getBalance.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
-
 
 
 
@@ -105,7 +99,7 @@ eval mpNext
 
 set title "eth-getBlockByNumber" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getBlockByNumber.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
 
@@ -114,7 +108,7 @@ eval mpNext
 
 set title "eth-getCode" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getCode.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
 
@@ -122,7 +116,7 @@ eval mpNext
 
 set title "eth-getStorageAt" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getStorageAt.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
 
@@ -130,7 +124,7 @@ eval mpNext
 
 set title "eth-getTransactionByHash" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getTransactionByHash.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
 
@@ -138,7 +132,7 @@ eval mpNext
 
 set title "eth-getTransactionCount" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getTransactionCount.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
      
@@ -147,7 +141,7 @@ eval mpNext
 
 set title "eth-getTransactionReceipt" font "Helvetica-bold,10" #offset 0,-0.2
 
-plot 'data/flood/nopbs-native/data.csv' u 2:11 t "no-pbs-native" w lp ls 2006, \
+plot 'data/flood/nopbs-native/eth_getTransactionReceipt.csv' u 3:9 t "no-pbs-native" w lp ls 2006, \
      'data/flood/nopbs-tee/data.csv' u 2:11 t "no-pbs-TEE" w lp ls 2007, \
      'data/flood/pbs-native/data.csv' u 2:11 t "pbs-native" w lp ls 22004 
 
