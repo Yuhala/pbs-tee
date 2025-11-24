@@ -1,6 +1,6 @@
 
 #!/bin/bash
-set -euo pipefail
+#set -euo pipefail
 
 #
 # Benchmark descriptions: all are read-only RPC calls which do not modify state nor consume gas
@@ -16,7 +16,7 @@ set -euo pipefail
 PRIVATE_KEY="${PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}"
 
 
-# Array of all RPC methods you want to benchmark
+# Array of all RPC methods 
 TYPES=(
   eth_call
   eth_getBalance
@@ -28,10 +28,9 @@ TYPES=(
   eth_getTransactionReceipt
 )
 
-# Rates you benchmark at
+# Rates 
 RATES=(100 200 300 400 500 600 700 800 900 1000)
 
-PRIVATE_KEY="${PRIVATE_KEY:-0xac0974...}"   # truncated for clarity
 RPC_ENDPOINT="${RPC_ENDPOINT:-http://localhost:8545}"
 
 echo "--- Running Flood benchmark for all RPC types ---"
@@ -43,7 +42,7 @@ for TYPE in "${TYPES[@]}"; do
     mkdir -p "$OUTPUT_DIR"
 
     flood "$TYPE" \
-        nopbs-native="$RPC_ENDPOINT" \
+        nopbs-tee="$RPC_ENDPOINT" \
         --rates "${RATES[@]}" \
         --duration 60 \
         --output="$OUTPUT_DIR"
