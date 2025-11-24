@@ -1,0 +1,6 @@
+Row_Index,TTI_Bucket,Num_Transactions
+0,1-2s,4
+1,2-3s,373
+2,3-4s,423
+3,4-5s,0
+4,5s+,0

@@ -1,0 +1,7 @@
+Row_Index,Gas_Bucket,Num_Transactions
+0,0-500k,800
+1,500k-650k,0
+2,650k-850k,0
+3,850k-1000k,0
+4,1000k-1300k,0
+5,1300k+,0
