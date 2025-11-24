@@ -2,8 +2,8 @@
 # Author: Peterson Yuhala
 #
 
-set term postscript size 3.3in,2.8in linewidth 1 color eps enhanced 22
-#set term postscript size 5in,4in linewidth 1 color eps enhanced 22
+#set term postscript size 3.3in,2.8in linewidth 1 color eps enhanced 22
+set term postscript size 5in,4in linewidth 1 color eps enhanced 22
 #call "common.gnuplot" "3.4in, 3.9in"
 set encoding utf8
 
@@ -25,13 +25,6 @@ mp_rowgap=0.17
 mp_colgap=0.08
 mp_width=0.80      
 
-
-mp_startx=0.08
-mp_starty=0.10
-mp_height=0.80
-mp_rowgap=0.13
-mp_colgap=0.1
-mp_width=0.90
 
 font_size = 14
 label_size = 18
@@ -76,10 +69,10 @@ set yrange [0:800]
 set key samplen 0.1 maxrows 2 at graph 0.5, 0.95 center font ",14"
 
 
-plot 'data/uniswap/nopbs_notee_uniswap_tti.csv' u ($2-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
-    'data/uniswap/nopbs_tee_uniswap_tti.csv' u ($2+dx):3 t "no-pbs-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
-    'data/uniswap/pbs_notee_op-rbuilder-uniswap_tti.csv' u ($2+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-    'data/uniswap/pbs_tee_op-rbuilder_uniswap_tti.csv' u ($2+4*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C4 fillstyle pattern 5
+plot 'data/uniswap/nopbs_notee_uniswap_tti.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
+    'data/uniswap/nopbs_tee_uniswap_tti.csv' u ($1+dx):3 t "no-pbs-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
+    'data/uniswap/pbs_notee_op-rbuilder-uniswap_tti.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
+    'data/uniswap/pbs_tee_op-rbuilder_uniswap_tti.csv' u ($1+4*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C4 fillstyle pattern 5
      
 unset xtics
 eval mpNext
@@ -97,10 +90,10 @@ set xtics offset 0,0.4,0 font ",12"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/uniswap/nopbs_notee_uniswap_pending_tx.csv' u 1:3 t "no-pbs-native" w lp ls 2006, \
-     'data/uniswap/nopbs_tee_uniswap_pending_tx.csv' u 1:3 t "no-pbs-TEE" w lp ls 2007, \
-     'data/uniswap/pbs_notee_op-rbuilder-uniswap_pending_tx.csv' u 1:3 t "pbs-native" w lp ls 22004, \
-     'data/uniswap/pbs_tee_op-rbuilder_uniswap_pending_tx.csv' u 1:3 t "pbs-TEE" w lp ls 2005   
+plot 'data/uniswap/nopbs_notee_uniswap_pending_tx.csv' u 1:3 t "no-pbs-native" w l ls 2006, \
+     'data/uniswap/nopbs_tee_uniswap_pending_tx.csv' u 1:3 t "no-pbs-TEE" w l ls 2007, \
+     'data/uniswap/pbs_notee_op-rbuilder-uniswap_pending_tx.csv' u 1:3 t "pbs-native" w l ls 22004, \
+     'data/uniswap/pbs_tee_op-rbuilder_uniswap_pending_tx.csv' u 1:3 t "pbs-TEE" w l ls 2005   
 
 unset xrange
 eval mpNext
@@ -124,6 +117,7 @@ set xlabel offset 0,1,0
 #unset key 
 set ylabel "Gas used (wei)" font ",16"  offset 2.5,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
+set yrange [0:1000000]
 
 plot 'data/uniswap/nopbs_notee_uniswap_gas_per_block.csv' u 2:3 t "no-pbs-native" w lp ls 2006, \
      'data/uniswap/nopbs_tee_uniswap_gas_per_block.csv' u 2:3 t "no-pbs-TEE" w lp ls 2007, \
