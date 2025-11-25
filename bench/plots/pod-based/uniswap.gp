@@ -66,7 +66,8 @@ set yrange [0:800]
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
 #set key samplen 1 font ",14" at graph 0.5,0.95
 
-set key samplen 0.75 maxrows 2 at graph 0.5, 0.95 center font ",14"
+set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
+
 
 
 
