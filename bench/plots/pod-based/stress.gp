@@ -47,7 +47,7 @@ set xlabel "Time buckets" font ",16"
 set xtics font ",14"
 
 
-set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",10"
+set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",14"
 #set xtics rotate by 60
 
 set style fill solid border -1
