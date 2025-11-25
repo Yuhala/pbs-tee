@@ -42,7 +42,7 @@ eval mpNext
 
 set title "Time to inclusion" font "Helvetica-bold,14" #offset 0,-0.2
 
-set ylabel "Num. of TXs" font ",16"  offset 1.25,0
+set ylabel "Num. of Txs" font ",16"  offset 2.5,0
 set xlabel "Time buckets" font ",16"
 set xtics font ",14"
 
@@ -51,12 +51,12 @@ set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",10"
 #set xtics rotate by 60
 
 set style fill solid border -1
-set boxwidth 0.2
+set boxwidth 0.15
 set xtics offset 0.4,0.4,0
 set ytics offset 0.5,0,0
 set xlabel offset 0,1,0
 
-dx=0.12
+dx=0.08
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 #set xrange[0:400]
@@ -66,13 +66,14 @@ set yrange [0:800]
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
 #set key samplen 1 font ",14" at graph 0.5,0.95
 
-set key samplen 0.1 maxrows 2 at graph 0.5, 0.95 center font ",14"
+set key samplen 0.75 maxrows 2 at graph 0.5, 0.95 center font ",14"
+
 
 
 plot 'data/uniswap/nopbs_notee_uniswap_tti.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
     'data/uniswap/nopbs_tee_uniswap_tti.csv' u ($1+dx):3 t "no-pbs-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
     'data/uniswap/pbs_notee_op-rbuilder-uniswap_tti.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-    'data/uniswap/pbs_tee_op-rbuilder_uniswap_tti.csv' u ($1+4*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C4 fillstyle pattern 5
+    'data/uniswap/pbs_tee_op-rbuilder_uniswap_tti.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
      
 unset xtics
 eval mpNext
@@ -80,67 +81,81 @@ eval mpNext
 set xrange[0:220]
 
 
-set yrange [0:30]
-set title "Pending TXs" font "Helvetica-bold,12" #offset 0,-0.2
+set yrange [0:20]
+set title "Pending Txs" font "Helvetica-bold,14" #offset 0,-0.2
 
-set ylabel "Num. of pending TXs" font ",16"  offset 2.5,0
+set ylabel "Num. of pending Txs" font ",16"  offset 2.5,0
 set xlabel "Timestamp" font ",16" 
 set xtics offset 0,0.4,0 font ",12"
 
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/uniswap/nopbs_notee_uniswap_pending_tx.csv' u 1:3 t "no-pbs-native" w l ls 2006, \
-     'data/uniswap/nopbs_tee_uniswap_pending_tx.csv' u 1:3 t "no-pbs-TEE" w l ls 2007, \
-     'data/uniswap/pbs_notee_op-rbuilder-uniswap_pending_tx.csv' u 1:3 t "pbs-native" w l ls 22004, \
-     'data/uniswap/pbs_tee_op-rbuilder_uniswap_pending_tx.csv' u 1:3 t "pbs-TEE" w l ls 2005   
+plot 'data/uniswap/nopbs_notee_uniswap_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
+      '' u 1:3 every 10 t "no-pbs-native" w lp ls 2006, \
+     'data/uniswap/nopbs_tee_uniswap_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
+     '' u 1:3 every 10 t "no-pbs-TEE" w lp ls 2007, \
+     'data/uniswap/pbs_notee_op-rbuilder-uniswap_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
+     '' u 1:3 every 10 t "pbs-native" w lp ls 22004, \
+     'data/uniswap/pbs_tee_op-rbuilder_uniswap_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
+        '' u 1:3 every 10 t "pbs-TEE" w lp ls 22001
 
 unset xrange
 eval mpNext
 # --- GRAPH bottom left
 
-set title "Gas per block" font "Helvetica-bold,12" 
+set title "Gas per block" font "Helvetica-bold,14" 
 set xlabel "Block number" font ",16"
 set xtics font ",14"
 
-
-
 set style fill solid border -1
-#set boxwidth 20
-set xtics offset 0,0.4,0
-set ytics offset 0.5,0,0
-set xlabel offset 0,1,0
 
-#set xrange[1:20]
 
 
 #unset key 
 set ylabel "Gas used (wei)" font ",16"  offset 2.5,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 set yrange [0:1000000]
+set xrange [0:120]
+set ytics("200k" 200000, "400k" 400000, "600k" 600000, "800k" 800000, "1M" 1000000) font ",12"
 
-plot 'data/uniswap/nopbs_notee_uniswap_gas_per_block.csv' u 2:3 t "no-pbs-native" w lp ls 2006, \
-     'data/uniswap/nopbs_tee_uniswap_gas_per_block.csv' u 2:3 t "no-pbs-TEE" w lp ls 2007, \
-     'data/uniswap/pbs_notee_op-rbuilder-uniswap_gas_per_block.csv' u 2:3 t "pbs-native" w lp ls 22004, \
-     'data/uniswap/pbs_tee_op-rbuilder_uniswap_gas_per_block.csv' u 2:3 t "pbs-TEE" w lp ls 2005    
+
+plot 'data/uniswap/nopbs_notee_uniswap_gas_per_block.csv' u 1:3 every 2  w l ls 2006 notitle, \
+      '' u 1:3 every 10 t "no-pbs-native" w lp ls 2006, \
+     'data/uniswap/nopbs_tee_uniswap_gas_per_block.csv' u 1:3 every 2  w l ls 2007 notitle, \
+     '' u 1:3 every 10 t "no-pbs-TEE" w lp ls 2007, \
+     'data/uniswap/pbs_notee_op-rbuilder-uniswap_gas_per_block.csv' u 1:3 every 2 w l ls 22004 notitle, \
+     '' u 1:3 every 10 t "pbs-native" w lp ls 22004, \
+     'data/uniswap/pbs_tee_op-rbuilder_uniswap_gas_per_block.csv' u 1:3 every 2 w l ls 22001 notitle, \
+        '' u 1:3 every 10 t "pbs-TEE" w lp ls 22001
      
 
 eval mpNext
 # --- GRAPH: bottom right
-set yrange [0:800]
-unset xtics
+set yrange [0:1000]
+unset xrange
 
 set style fill solid border -1
-set boxwidth 0.25
+set boxwidth 0.15
+set xtics offset 0.4,0.4,0
+set ytics offset 0.5,0,0
+set xlabel offset 0,1,0
 
-set xtics("0-500k" 0, "500k-650k" 1, "650k-850k" 2, "850k-1M" 3, "1M-1.3M" 4, "1.3M+" 5) offset 0,0.3,0 font ",12"
-set xtics rotate by 45
 
-set title "TX gas used" font "Helvetica-bold,12" #offset 0,-0.2
+#set xtics("0-500k" 0, "500k-650k" 1, "650k-850k" 2, "850k-1M" 3, "1M-1.3M" 4, "1.3M+" 5) offset 0,0.3,0 font ",10"
+set xtics("0-5" 0, "5-6.5" 1) font ",10"
+#set xtics rotate by 45
+#set xrange [-0.7:10]
 
-set ylabel "Num. of TXs" font ",16"  offset 2.5,0
-set xlabel "Gas used" font ",16"
-dx=0.14
+
+
+set ytics("200" 200, "400" 400, "600" 600, "800" 800, "1000" 1000) font ",12"
+
+set title "Tx gas used" font "Helvetica-bold,14" #offset 0,-0.2
+
+set ylabel "Num. of Txs" font ",16"  offset 3.5,0
+set xlabel "Gas used (x100000 wei)" font ",16"
+dx=0.08
 
 #set label "min = 1μs" at graph 0.6,0.9 font ",16"
 #set label "avg = 2^{48}μs" at graph 0.6,0.78 font ",16"
@@ -151,7 +166,7 @@ dx=0.14
 plot 'data/uniswap/nopbs_notee_uniswap_tx_gas_used.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
      'data/uniswap/nopbs_tee_uniswap_tx_gas_used.csv' u ($1+dx):3 t "no-pbs-TEE" with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
      'data/uniswap/pbs_notee_op-rbuilder-uniswap_tx_gas_used.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-     'data/uniswap/pbs_tee_op-rbuilder_uniswap_tx_gas_used.csv' u ($1+4*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C4 fillstyle pattern 5  
+     'data/uniswap/pbs_tee_op-rbuilder_uniswap_tx_gas_used.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
 
      
 !epstopdf "uniswap.eps"

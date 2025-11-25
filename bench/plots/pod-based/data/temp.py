@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 import numpy as np
+import io 
+import sys # Added for command line arguments
 
 # --- Helper Function ---
 
@@ -21,7 +23,8 @@ def get_output_filepath(input_filepath: str, suffix: str, output_dir: str = './a
 
 def analyze_tti_buckets(df: pd.DataFrame, input_filepath: str) -> None:
     """
-    Calculates Time to Inclusion (TTI) and groups transactions into time buckets.
+    Calculates Time to Inclusion (TTI) and groups transactions into the requested time buckets:
+    1-2s, 2-3s, 3-4s, 4-5s, and 5s+.
     Saves the result to a CSV file named <source-csv-filename>_tti.csv.
     """
     print("\n--- 1. Analyzing Time to Inclusion (TTI) ---")
@@ -29,16 +32,17 @@ def analyze_tti_buckets(df: pd.DataFrame, input_filepath: str) -> None:
     # Calculate TTI (Time to Inclusion) in seconds
     df['tti'] = df['end_time'] - df['start_time']
     
-    # Define TTI buckets (in seconds)
-    # Buckets: 1-2s, 2-4s, 4-6s, 6-8s, >8s
-    bins = [0, 2, 4, 6, 8, np.inf]
-    labels = ['1-2s', '2-4s', '4-6s', '6-8s', '>8s']
+    # Define the NEW TTI buckets: [1, 2), [2, 3), [3, 4), [4, 5), [5, inf)
+    bins = [1, 2, 3, 4, 5, np.inf]
+    labels = ['1-2s', '2-3s', '3-4s', '4-5s', '5s+']
 
     # Use pd.cut to assign transactions to buckets
-    df['tti_bucket'] = pd.cut(df['tti'], bins=bins, labels=labels, right=False)
+    df['tti_bucket'] = pd.cut(df['tti'], bins=bins, labels=labels, right=False, include_lowest=True)
     
-    # Group by the bucket and count the transactions
-    tti_counts = df.groupby('tti_bucket', observed=True).size().reset_index(name='num_transactions')
+    # --- LOGIC to include zero-count buckets ---
+    # Use value_counts with dropna=False to count all categories, including those with 0 transactions.
+    # sort_index() ensures the categorical order defined by pd.cut is maintained.
+    tti_counts = df['tti_bucket'].value_counts(dropna=False).sort_index().reset_index(name='Num_Transactions')
     
     # Rename columns and add index
     tti_counts.columns = ['TTI_Bucket', 'Num_Transactions']
@@ -47,33 +51,36 @@ def analyze_tti_buckets(df: pd.DataFrame, input_filepath: str) -> None:
     # Save the result
     output_path = get_output_filepath(input_filepath, '_tti')
     tti_counts.to_csv(output_path, index=False)
-    print(f"✅ TTI buckets saved to: {output_path}")
+    print(f"✅ TTI buckets saved to: {output_path} (includes zero counts)")
 
 
-# --- Analysis Function 2: Pending Transactions Over Time ---
+# --- Analysis Function 2: Pending Transactions Over Time (Updated to 1-second step) ---
 
-def analyze_pending_txs_over_time(df: pd.DataFrame, input_filepath: str, time_step: int = 2) -> None:
+def analyze_pending_txs_over_time(df: pd.DataFrame, input_filepath: str, time_step: int = 1) -> None:
     """
-    Calculates the number of pending transactions at regular time intervals.
-    A transaction is pending if its 'end_time' is greater than the timestamp.
+    Calculates the number of pending transactions at regular time intervals (defaulting to 1 second).
+    A transaction is pending if it has arrived ('start_time' <= timestamp) 
+    AND has not yet been included ('end_time' > timestamp).
     Saves the result to a CSV file named <source-csv-filename>_pending_tx.csv.
     """
-    print("\n--- 2. Analyzing Pending Transactions Over Time ---")
+    print(f"\n--- 2. Analyzing Pending Transactions Over Time ({time_step}-second steps) ---")
 
     # Determine the time range to analyze
     min_start_time = df['start_time'].min()
     max_end_time = df['end_time'].max()
     
-    # Create time buckets based on the time_step (e.g., every 2 seconds)
+    # Create time bins based on the 1-second time_step
     time_bins = np.arange(min_start_time, max_end_time + time_step, time_step)
     
     pending_data = []
     
     # Loop through each timestamp and count pending transactions
     for timestamp in time_bins:
-        # A transaction is pending at 'timestamp' if its 'end_time' > 'timestamp'
-        # The inclusion of a transaction implies it was pending until 'end_time'.
-        num_pending = len(df[df['end_time'] > timestamp])
+        # --- CORRECTED LOGIC ---
+        # A transaction is pending if:
+        # 1. It has arrived: df['start_time'] <= timestamp
+        # 2. It has not yet been confirmed: df['end_time'] > timestamp
+        num_pending = len(df[(df['start_time'] <= timestamp) & (df['end_time'] > timestamp)])
         
         pending_data.append({
             'timestamp': timestamp,
@@ -87,7 +94,7 @@ def analyze_pending_txs_over_time(df: pd.DataFrame, input_filepath: str, time_st
 
     output_path = get_output_filepath(input_filepath, '_pending_tx')
     pending_df.to_csv(output_path, index=False)
-    print(f"✅ Pending transactions over time saved to: {output_path}")
+    print(f"✅ Pending transactions over time saved to: {output_path} (Using accurate arrival/inclusion logic)")
 
 
 # --- Analysis Function 3: Total Gas Used Per Block ---
@@ -116,29 +123,28 @@ def analyze_gas_per_block(df: pd.DataFrame, input_filepath: str) -> None:
 
 def analyze_tx_gas_used_buckets(df: pd.DataFrame, input_filepath: str, num_buckets: int = 5) -> None:
     """
-    Groups individual transaction gas usage into a specified number of buckets.
+    Groups individual transaction gas usage into 5 manually defined buckets.
     Saves the result to a CSV file named <source-csv-filename>_tx_gas_used.csv.
     """
     print("\n--- 4. Analyzing Transaction Gas Used Buckets ---")
 
-    # Define gas buckets manually for better interpretation (in thousands)
-    # Given the sample data, let's create a range that covers the observed values.
-    # Min gas used is ~500k, Max is ~1250k.
+    # Define gas buckets manually (in thousands)
+    # Changed the lowest bin from 300,000 to 0 to capture all transactions,
+    # including those with low gas usage, thus eliminating the empty bucket.
+    bins = [0, 500000, 650000, 850000, 1000000, 1300000, np.inf] 
+    # Updated the label to reflect the new range start
+    labels = ['0-500k', '500k-650k', '650k-850k', '850k-1000k', '1000k-1300k', '1300k+']
     
-    # Note: 'k' stands for thousand (1000)
-    # The bins are inclusive on the lower bound and exclusive on the upper bound (right=False).
-    bins = [500000, 650000, 800000, 950000, 1100000, 1300000] 
-    labels = ['500k-650k', '650k-800k', '800k-950k', '950k-1100k', '1100k-1300k+']
-    
-    # Alternative: Use pd.cut with 'num_buckets' for automated equal-width binning
-    # df['gas_bucket'] = pd.cut(df['gas_used'], bins=num_buckets)
-    # labels = [str(interval) for interval in df['gas_bucket'].unique().categories] # Extract labels if using auto-binning
-
     # Use pd.cut to assign transactions to the manual buckets
     df['gas_bucket'] = pd.cut(df['gas_used'], bins=bins, labels=labels, right=False, include_lowest=True)
     
-    # Group by the bucket and count the transactions
-    gas_counts = df.groupby('gas_bucket', observed=True).size().reset_index(name='num_transactions')
+    # --- LOGIC to include zero-count buckets ---
+    # Use value_counts with dropna=False to count all categories, including those with 0 transactions.
+    # sort_index() ensures the categorical order defined by pd.cut is maintained.
+    gas_counts = df['gas_bucket'].value_counts(dropna=False).sort_index().reset_index(name='Num_Transactions')
+    
+    # The empty/NaN bucket (index 6 in your output) should now be gone, 
+    # with its transactions merged into the '0-500k' bucket.
     
     # Rename columns and add index
     gas_counts.columns = ['Gas_Bucket', 'Num_Transactions']
@@ -147,7 +153,7 @@ def analyze_tx_gas_used_buckets(df: pd.DataFrame, input_filepath: str, num_bucke
     # Save the result
     output_path = get_output_filepath(input_filepath, '_tx_gas_used')
     gas_counts.to_csv(output_path, index=False)
-    print(f"✅ Gas used buckets saved to: {output_path}")
+    print(f"✅ Gas used buckets saved to: {output_path} (includes zero counts, now starting from 0)")
 
 
 # --- Main Execution Block ---
@@ -172,9 +178,8 @@ def main_analysis(input_filepath: str):
     # 1. TTI Buckets
     analyze_tti_buckets(df.copy(), input_filepath)
 
-    # 2. Pending Transactions Over Time
-    # Note: The raw times are large timestamps, the calculation uses differences.
-    analyze_pending_txs_over_time(df.copy(), input_filepath, time_step=2)
+    # 2. Pending Transactions Over Time (Now using 1-second steps by default)
+    analyze_pending_txs_over_time(df.copy(), input_filepath)
 
     # 3. Gas Used Per Block
     analyze_gas_per_block(df.copy(), input_filepath)
@@ -186,41 +191,11 @@ def main_analysis(input_filepath: str):
 
 
 if __name__ == '__main__':
-    # --- Create a sample CSV file for demonstration ---
-    # In a real scenario, replace 'sample_data.csv' with your actual benchmark file path.
-    SAMPLE_DATA = """tx_hash,start_time,end_time,block_number,gas_used,kind,error
-0x3d96031a572e8f173e1940ae4ce28d58a4364ceba990a95bff7136b3547786e0,1763930328,1763930331,8498,1083125,,
-0xce06f2d3ae25d45788a7769f4e4de73183c892a10a1f5912795f6944f95ff8e3,1763930328,1763930331,8498,891213,,
-0xcd2668f52dc68eb8c145641e61c48b39d93ae74a665d51be6240e3cd6345556e,1763930328,1763930331,8498,762184,,
-0xe7b048b84ac8ee58510b0feb0658c21e134435851feaa4241f604d065e980b07,1763930328,1763930331,8498,870605,,
-0x2c3da3d4efb87384a37b1957d3b109e78461a718f5a0bc495051071bbc996800,1763930329,1763930333,8499,638926,,
-0xe0f6c063414f80ce411fada8e9b6fd69b1b6557e0faab8461209e24f7d8af590,1763930329,1763930333,8499,1122248,,
-0x63df932007722ba2bb9a6835c0d0c7c47af0223bd12bd51c3efe0355805f1034,1763930329,1763930333,8499,983627,,
-0xc7b13458117045a7c8ba3152019693411fb48a5969fdfd7c0dbd9250d791053e,1763930329,1763930333,8499,509321,,
-0xa6ce38bff4a118d3b760dd1ebb2ba0a7d449e9b2b42b9585648364a8f6bcd8c7,1763930330,1763930333,8499,1250565,,
-0x7c44517db65e52d0c39480a101edc88b024c4a4f945ea088f7e30dfcb2a3b2e4,1763930330,1763930333,8499,553113,,
-0x959be7c29896538672c4ebb649c1c2ed00d3a51a7cccdee3b9bf642d6383e372,1763930330,1763930333,8499,593846,,
-0x4708b7fc91802264e7be27192c541632240c13c018b34b03a823c7be2cf1764a,1763930330,1763930333,8499,543775,,
-0xd64a9a8da9fc355a2190daa515c03cb358575041fb592274d56c7d0c48b79a33,1763930331,1763930335,8500,750016,,
-0xcdc46623a1b2df91bf1953762c92e6f124ec18cdaae8b6cf7524c4a8664ff332,1763930331,1763930335,8500,1196791,,
-0x64a9ef1ddf5ae638b72cf10440c7fde4fd27f2bba7e6a73f9d354d8d5a5bb3a1,1763930331,1763930335,8500,797028,,
-0x22fd3c20c48a60656c8a8af33791c1018042d7dbb159a0fe948dce86b63dfbd1,1763930331,1763930335,8500,883002,,
-0x74414e518bdc61bc4095cc8e12e996692c4ef1f335b5c9e24e728c3a162d96b7,1763930332,1763930335,8500,1094556,,
-0xd6c47ef3c2231147af27fb7dd8b1d2dba005a08e832709c05c719b9d9e23e2b2,1763930332,1763930335,8500,1027741,,
-0x5d5795dfe70ad891d0daa2a78aee0d9c0324e937c16075ff0b8ee0f37d0b1e71,1763930332,1763930335,8500,677405,,
-0xba1fcdf9d4725aa3709e38d734429b99eb74407620c3ee15b8da9c02f57fc514,1763930333,1763930337,8501,520752,,
-0xd4ff7587945fbc9edf27faa9703258fc6d049cf9e4a8e3e5eb0abf2615e5e2aa,1763930333,1763930337,8501,814577,,
-0xd4ff7587945fbc9edf27faa9703258fc6d049cf9e4a8e3e5eb0abf2615e5e2aa,1763930333,1763930337,8501,814577,,
-0x1111111111111111111111111111111111111111111111111111111111111111,1763930334,1763930342,8502,1500000,,
-0x2222222222222222222222222222222222222222222222222222222222222222,1763930334,1763930342,8502,300000,,
-"""
-
-# The file path to use for demonstration
-INPUT_FILE = 'stress/raw/nopbs_notee_stress.csv'
-
-# Save the sample data to a file so the script can read it
-with open(INPUT_FILE, 'w') as f:
-    f.write(SAMPLE_DATA)
-
-# Run the analysis on the sample file
-main_analysis(INPUT_FILE)
+    # Check if an input file path was provided as a command-line argument
+    if len(sys.argv) < 2:
+        print("Usage: python data_analysis.py <path_to_input_csv_file>")
+        sys.exit(1)
+    
+    # The input file path is the first argument after the script name
+    input_file_path = sys.argv[1]
+    main_analysis(input_file_path)

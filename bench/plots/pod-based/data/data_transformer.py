@@ -131,9 +131,8 @@ def analyze_tx_gas_used_buckets(df: pd.DataFrame, input_filepath: str, num_bucke
     # Define gas buckets manually (in thousands)
     # Changed the lowest bin from 300,000 to 0 to capture all transactions,
     # including those with low gas usage, thus eliminating the empty bucket.
-    bins = [0, 500000, 650000, 850000, 1000000, 1300000, np.inf] 
-    # Updated the label to reflect the new range start
-    labels = ['0-500k', '500k-650k', '650k-850k', '850k-1000k', '1000k-1300k', '1300k+']
+    bins = [0, 200000, 400000, 600000, np.inf] 
+    labels = ['0-200k', '200k-400k', '400k-600k', '600k+']
     
     # Use pd.cut to assign transactions to the manual buckets
     df['gas_bucket'] = pd.cut(df['gas_used'], bins=bins, labels=labels, right=False, include_lowest=True)

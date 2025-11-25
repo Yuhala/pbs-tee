@@ -7,7 +7,7 @@ set term postscript size 5in,4in linewidth 1 color eps enhanced 22
 #call "common.gnuplot" "3.4in, 3.9in"
 set encoding utf8
 
-set output "erc20.eps"
+set output "stress.eps"
 set datafile separator comma
 
 load "styles.inc"
@@ -60,7 +60,7 @@ dx=0.08
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 #set xrange[0:400]
-set yrange [0:800]
+set yrange [0:600]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
@@ -70,10 +70,10 @@ set key samplen 0.75 maxrows 2 at graph 0.5, 0.95 center font ",14"
 
 
 
-plot 'data/erc20/nopbs_notee_erc20_tti.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
-    'data/erc20/nopbs_tee_erc20_tti.csv' u ($1+dx):3 t "no-pbs-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
-    'data/erc20/pbs_notee_op-rbuilder-erc20_tti.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-    'data/erc20/pbs_tee_op-rbuilder_erc20_tti.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
+plot 'data/stress/nopbs_notee_stress_tti.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
+    'data/stress/nopbs_tee_stress_tti.csv' u ($1+dx):3 t "no-pbs-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
+    'data/stress/pbs_notee_op-rbuilder-stress_tti.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
+    'data/stress/pbs_tee_op-rbuilder_stress_tti.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
      
 unset xtics
 eval mpNext
@@ -91,13 +91,13 @@ set xtics offset 0,0.4,0 font ",12"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/erc20/nopbs_notee_erc20_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
+plot 'data/stress/nopbs_notee_stress_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
       '' u 1:3 every 10 t "no-pbs-native" w lp ls 2006, \
-     'data/erc20/nopbs_tee_erc20_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
+     'data/stress/nopbs_tee_stress_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
      '' u 1:3 every 10 t "no-pbs-TEE" w lp ls 2007, \
-     'data/erc20/pbs_notee_op-rbuilder-erc20_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
+     'data/stress/pbs_notee_op-rbuilder-stress_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
      '' u 1:3 every 10 t "pbs-native" w lp ls 22004, \
-     'data/erc20/pbs_tee_op-rbuilder_erc20_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
+     'data/stress/pbs_tee_op-rbuilder_stress_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
         '' u 1:3 every 10 t "pbs-TEE" w lp ls 22001
 
 unset xrange
@@ -115,18 +115,20 @@ set style fill solid border -1
 #unset key 
 set ylabel "Gas used (wei)" font ",16"  offset 2.5,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
-set yrange [0:1000000]
+set yrange [0:10000000]
 set xrange [0:120]
-set ytics("200k" 200000, "400k" 400000, "600k" 600000, "800k" 800000, "1M" 1000000) font ",12"
+# Gas per block for stress bench is much higher than erc20 and uniswap
+#set ytics("200k" 200000, "400k" 400000, "600k" 600000, "800k" 800000, "1M" 1000000) font ",12"
+set ytics("2M" 2000000, "4M" 4000000, "6M" 6000000, "8M" 8000000, "10M" 10000000) font ",12"
 
 
-plot 'data/erc20/nopbs_notee_erc20_gas_per_block.csv' u 1:3 every 2  w l ls 2006 notitle, \
+plot 'data/stress/nopbs_notee_stress_gas_per_block.csv' u 1:3 every 2  w l ls 2006 notitle, \
       '' u 1:3 every 10 t "no-pbs-native" w lp ls 2006, \
-     'data/erc20/nopbs_tee_erc20_gas_per_block.csv' u 1:3 every 2  w l ls 2007 notitle, \
+     'data/stress/nopbs_tee_stress_gas_per_block.csv' u 1:3 every 2  w l ls 2007 notitle, \
      '' u 1:3 every 10 t "no-pbs-TEE" w lp ls 2007, \
-     'data/erc20/pbs_notee_op-rbuilder-erc20_gas_per_block.csv' u 1:3 every 2 w l ls 22004 notitle, \
+     'data/stress/pbs_notee_op-rbuilder-stress_gas_per_block.csv' u 1:3 every 2 w l ls 22004 notitle, \
      '' u 1:3 every 10 t "pbs-native" w lp ls 22004, \
-     'data/erc20/pbs_tee_op-rbuilder_erc20_gas_per_block.csv' u 1:3 every 2 w l ls 22001 notitle, \
+     'data/stress/pbs_tee_op-rbuilder_stress_gas_per_block.csv' u 1:3 every 2 w l ls 22001 notitle, \
         '' u 1:3 every 10 t "pbs-TEE" w lp ls 22001
      
 
@@ -143,7 +145,7 @@ set xlabel offset 0,1,0
 
 
 #set xtics("0-500k" 0, "500k-650k" 1, "650k-850k" 2, "850k-1M" 3, "1M-1.3M" 4, "1.3M+" 5) offset 0,0.3,0 font ",10"
-set xtics("0-5" 0, "5-6.5" 1) font ",10"
+set xtics("0-5" 0, "5-6.5" 1, "6.5-8.5" 2, "8.5-10" 3, "10-13" 4, "13+" 5 ) font ",10"
 #set xtics rotate by 45
 #set xrange [-0.7:10]
 
@@ -163,12 +165,12 @@ dx=0.08
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/erc20/nopbs_notee_erc20_tx_gas_used.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
-     'data/erc20/nopbs_tee_erc20_tx_gas_used.csv' u ($1+dx):3 t "no-pbs-TEE" with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
-     'data/erc20/pbs_notee_op-rbuilder-erc20_tx_gas_used.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-     'data/erc20/pbs_tee_op-rbuilder_erc20_tx_gas_used.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
+plot 'data/stress/nopbs_notee_stress_tx_gas_used.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
+     'data/stress/nopbs_tee_stress_tx_gas_used.csv' u ($1+dx):3 t "no-pbs-TEE" with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
+     'data/stress/pbs_notee_op-rbuilder-stress_tx_gas_used.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
+     'data/stress/pbs_tee_op-rbuilder_stress_tx_gas_used.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
 
      
-!epstopdf "erc20.eps"
-!rm "erc20.eps"
+!epstopdf "stress.eps"
+!rm "stress.eps"
 quit

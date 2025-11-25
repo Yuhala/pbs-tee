@@ -35,6 +35,9 @@ set style line 2007  lc rgb "#1F7935" lw 5 pt 10 ps 1 dt (2,1,2,1)  # additional
 set style line 2008  lc rgb "#0E539C" lw 3 pt 7 ps 2 dt 1 #native -- blue dashed line -- circle points
 set style line 2009  lc rgb "#0E539C" lw 5 pt 7 ps 2 dt 1 #blue solid line -- diamond points
 
+
+set style line 22001  lc rgb "#0E539C" lw 5 pt 13 ps 2  dt (2,1,2,1) #red dashed line -- diamond points
+
 #more variants
 set style line 22004  lc rgb "#A16C2D" lw 4 pt 4 ps 1  dt (2,1,2,1)  #dark brown dashed line -- empty square points
 
