@@ -115,7 +115,7 @@ set style fill solid border -1
 #unset key 
 set ylabel "Gas used (wei)" font ",16"  offset 2,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
-set yrange [0:1000000]
+set yrange [0:600000]
 set xrange [0:120]
 # Gas per block for erc20 bench is much higher than erc20 and uniswap
 set ytics("200k" 200000, "400k" 400000, "600k" 600000, "800k" 800000, "1M" 1000000) font ",12"

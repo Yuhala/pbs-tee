@@ -91,13 +91,13 @@ set xtics offset 0,0.4,0 font ",12"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/stress/pbs_notee_op-geth-stress_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
+plot 'data/stress/pbs_notee_op-geth-stress_pending_tx.csv' u 1:3 every 10  w l ls 2006 notitle, \
       '' u 1:3 every 10 t "noTEE-op-geth" w lp ls 2006, \
-     'data/stress/pbs_tee_op-geth_stress_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
+     'data/stress/pbs_tee_op-geth_stress_pending_tx.csv' u 1:3 every 10  w l ls 2007 notitle, \
      '' u 1:3 every 10 t "TEE-op-geth" w lp ls 2007, \
-     'data/stress/pbs_notee_op-rbuilder-stress_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
+     'data/stress/pbs_notee_op-rbuilder-stress_pending_tx.csv' u 1:3 every 10 w l ls 22004 notitle, \
      '' u 1:3 every 10 t "noTEE-op-rbuilder" w lp ls 22004, \
-     'data/stress/pbs_tee_op-rbuilder_stress_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
+     'data/stress/pbs_tee_op-rbuilder_stress_pending_tx.csv' u 1:3 every 10 w l ls 22001 notitle, \
         '' u 1:3 every 10 t "TEE-op-rbuilder" w lp ls 22001
 
 unset xrange
