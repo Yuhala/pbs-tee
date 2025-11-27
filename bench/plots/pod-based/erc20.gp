@@ -40,7 +40,7 @@ eval mpNext
 # --- GRAPH a (top left)
 
 
-set title "Time to inclusion" font "Helvetica-bold,14" #offset 0,-0.2
+set title "Time to inclusion (TTI)" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of Txs" font ",16"  offset 2.5,0
 set xlabel "Time buckets" font ",16"
@@ -70,10 +70,10 @@ set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
 
 
 
-plot 'data/erc20/nopbs_notee_erc20_tti.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
-    'data/erc20/nopbs_tee_erc20_tti.csv' u ($1+dx):3 t "no-pbs-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
-    'data/erc20/pbs_notee_op-rbuilder-erc20_tti.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-    'data/erc20/pbs_tee_op-rbuilder_erc20_tti.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
+plot 'data/erc20/nopbs_notee_erc20_tti.csv' u ($1-dx):3 t "noPBS-noTEE" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
+    'data/erc20/nopbs_tee_erc20_tti.csv' u ($1+dx):3 t "noPBS-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
+    'data/erc20/pbs_notee_op-rbuilder-erc20_tti.csv' u ($1+3*dx):3 t "PBS-noTEE"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
+    'data/erc20/pbs_tee_op-rbuilder_erc20_tti.csv' u ($1+5*dx):3 t "PBS-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
      
 unset xtics
 eval mpNext
@@ -92,13 +92,13 @@ set xtics offset 0,0.4,0 font ",12"
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
 plot 'data/erc20/nopbs_notee_erc20_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
-      '' u 1:3 every 10 t "no-pbs-native" w lp ls 2006, \
+      '' u 1:3 every 10 t "noPBS-noTEE" w lp ls 2006, \
      'data/erc20/nopbs_tee_erc20_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
-     '' u 1:3 every 10 t "no-pbs-TEE" w lp ls 2007, \
+     '' u 1:3 every 10 t "noPBS-TEE" w lp ls 2007, \
      'data/erc20/pbs_notee_op-rbuilder-erc20_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
-     '' u 1:3 every 10 t "pbs-native" w lp ls 22004, \
+     '' u 1:3 every 10 t "PBS-noTEE" w lp ls 22004, \
      'data/erc20/pbs_tee_op-rbuilder_erc20_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
-        '' u 1:3 every 10 t "pbs-TEE" w lp ls 22001
+        '' u 1:3 every 10 t "PBS-TEE" w lp ls 22001
 
 unset xrange
 eval mpNext
@@ -121,13 +121,13 @@ set ytics("200k" 200000, "400k" 400000, "600k" 600000, "800k" 800000, "1M" 10000
 
 
 plot 'data/erc20/nopbs_notee_erc20_gas_per_block.csv' u 1:3 every 2  w l ls 2006 notitle, \
-      '' u 1:3 every 10 t "no-pbs-native" w lp ls 2006, \
+      '' u 1:3 every 10 t "noPBS-noTEE" w lp ls 2006, \
      'data/erc20/nopbs_tee_erc20_gas_per_block.csv' u 1:3 every 2  w l ls 2007 notitle, \
-     '' u 1:3 every 10 t "no-pbs-TEE" w lp ls 2007, \
+     '' u 1:3 every 10 t "noPBS-TEE" w lp ls 2007, \
      'data/erc20/pbs_notee_op-rbuilder-erc20_gas_per_block.csv' u 1:3 every 2 w l ls 22004 notitle, \
-     '' u 1:3 every 10 t "pbs-native" w lp ls 22004, \
+     '' u 1:3 every 10 t "PBS-noTEE" w lp ls 22004, \
      'data/erc20/pbs_tee_op-rbuilder_erc20_gas_per_block.csv' u 1:3 every 2 w l ls 22001 notitle, \
-        '' u 1:3 every 10 t "pbs-TEE" w lp ls 22001
+        '' u 1:3 every 10 t "PBS-TEE" w lp ls 22001
      
 
 eval mpNext
@@ -163,10 +163,10 @@ dx=0.08
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/erc20/nopbs_notee_erc20_tx_gas_used.csv' u ($1-dx):3 t "no-pbs-native" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
-     'data/erc20/nopbs_tee_erc20_tx_gas_used.csv' u ($1+dx):3 t "no-pbs-TEE" with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
-     'data/erc20/pbs_notee_op-rbuilder-erc20_tx_gas_used.csv' u ($1+3*dx):3 t "pbs-native"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-     'data/erc20/pbs_tee_op-rbuilder_erc20_tx_gas_used.csv' u ($1+5*dx):3 t "pbs-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
+plot 'data/erc20/nopbs_notee_erc20_tx_gas_used.csv' u ($1-dx):3 t "noPBS-noTEE" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
+     'data/erc20/nopbs_tee_erc20_tx_gas_used.csv' u ($1+dx):3 t "noPBS-TEE" with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
+     'data/erc20/pbs_notee_op-rbuilder-erc20_tx_gas_used.csv' u ($1+3*dx):3 t "PBS-noTEE"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
+     'data/erc20/pbs_tee_op-rbuilder_erc20_tx_gas_used.csv' u ($1+5*dx):3 t "PBS-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
 
      
 !epstopdf "erc20.eps"
