@@ -113,7 +113,7 @@ set style fill solid border -1
 
 
 #unset key 
-set ylabel "Gas used (wei)" font ",16"  offset 2,0
+set ylabel "Gas used" font ",16"  offset 2,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 set yrange [0:1000000]
 set xrange [0:120]
@@ -156,7 +156,7 @@ set ytics("200" 200, "400" 400, "600" 600, "800" 800, "1k" 1000) font ",12"
 set title "Tx gas used" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of Txs" font ",16"  offset 2.5,0
-set xlabel "Gas used (x100000 wei)" font ",16"
+set xlabel "Gas used (x100000)" font ",16"
 dx=0.08
 
 #set label "min = 1μs" at graph 0.6,0.9 font ",16"

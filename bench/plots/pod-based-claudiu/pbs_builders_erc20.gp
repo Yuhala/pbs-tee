@@ -73,7 +73,7 @@ set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
 plot 'data/erc20/pbs_notee_op-geth-erc20_tti.csv' u ($1-dx):3 t "noTEE-op-geth" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
     'data/erc20/pbs_tee_op-geth_erc20_tti.csv' u ($1+dx):3 t "TEE-op-geth"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
     'data/erc20/pbs_notee_op-rbuilder-erc20_tti.csv' u ($1+3*dx):3 t "noTEE-op-rbuilder"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-    'data/erc20/pbs_tee_op-rbuilder_erc20_tti.csv' u ($1+5*dx):3 t "TEE-op-rebuilder"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
+    'data/erc20/pbs_tee_op-rbuilder_erc20_tti.csv' u ($1+5*dx):3 t "TEE-op-rbuilder"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
      
 unset xtics
 eval mpNext
@@ -91,14 +91,14 @@ set xtics offset 0,0.4,0 font ",12"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/erc20/pbs_notee_op-geth-erc20_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
-      '' u 1:3 every 10 t "noTEE-op-geth" w lp ls 2006, \
-     'data/erc20/pbs_tee_op-geth_erc20_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
-     '' u 1:3 every 10 t "TEE-op-geth" w lp ls 2007, \
-     'data/erc20/pbs_notee_op-rbuilder-erc20_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
-     '' u 1:3 every 10 t "noTEE-op-rbuilder" w lp ls 22004, \
-     'data/erc20/pbs_tee_op-rbuilder_erc20_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
-        '' u 1:3 every 10 t "TEE-op-rbuilder" w lp ls 22001
+plot 'data/erc20/pbs_notee_op-geth-erc20_pending_tx_smoothed.csv' u 1:4 every 2  w l ls 2006 notitle, \
+      '' u 1:4 every 10 t "noTEE-op-geth" w lp ls 2006, \
+     'data/erc20/pbs_tee_op-geth_erc20_pending_tx_smoothed.csv' u 1:4 every 2  w l ls 2007 notitle, \
+     '' u 1:4 every 10 t "TEE-op-geth" w lp ls 2007, \
+     'data/erc20/pbs_notee_op-rbuilder-erc20_pending_tx_smoothed.csv' u 1:4 every 2 w l ls 22004 notitle, \
+     '' u 1:4 every 10 t "noTEE-op-rbuilder" w lp ls 22004, \
+     'data/erc20/pbs_tee_op-rbuilder_erc20_pending_tx_smoothed.csv' u 1:4 every 2 w l ls 22001 notitle, \
+        '' u 1:4 every 10 t "TEE-op-rbuilder" w lp ls 22001
 
 unset xrange
 eval mpNext
@@ -113,7 +113,7 @@ set style fill solid border -1
 
 
 #unset key 
-set ylabel "Gas used (wei)" font ",16"  offset 2,0
+set ylabel "Gas used" font ",16"  offset 2,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 set yrange [0:600000]
 set xrange [0:120]
@@ -156,7 +156,7 @@ set ytics("200" 200, "400" 400, "600" 600, "800" 800, "1000" 1000) font ",12"
 set title "Tx gas used" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of Txs" font ",16"  offset 2.5,0
-set xlabel "Gas used (x100000 wei)" font ",16"
+set xlabel "Gas used (x100000)" font ",16"
 dx=0.08
 
 #set label "min = 1μs" at graph 0.6,0.9 font ",16"

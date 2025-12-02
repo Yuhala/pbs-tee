@@ -91,14 +91,14 @@ set xtics offset 0,0.4,0 font ",12"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/stress/nopbs_notee_stress_pending_tx.csv' u 1:3 every 2  w l ls 2006 notitle, \
-      '' u 1:3 every 10 t "noPBS-noTEE" w lp ls 2006, \
-     'data/stress/nopbs_tee_stress_pending_tx.csv' u 1:3 every 2  w l ls 2007 notitle, \
-     '' u 1:3 every 10 t "noPBS-TEE" w lp ls 2007, \
-     'data/stress/pbs_notee_op-geth-stress_pending_tx.csv' u 1:3 every 2 w l ls 22004 notitle, \
-     '' u 1:3 every 10 t "PBS-noTEE" w lp ls 22004, \
-     'data/stress/pbs_tee_op-geth_stress_pending_tx.csv' u 1:3 every 2 w l ls 22001 notitle, \
-        '' u 1:3 every 10 t "PBS-TEE" w lp ls 22001
+plot 'data/stress/nopbs_notee_stress_pending_tx_smoothed.csv' u 1:4 every 2  w l ls 2006 notitle, \
+      '' u 1:4 every 10 t "noPBS-noTEE" w lp ls 2006, \
+     'data/stress/nopbs_tee_stress_pending_tx_smoothed.csv' u 1:4 every 2  w l ls 2007 notitle, \
+     '' u 1:4 every 10 t "noPBS-TEE" w lp ls 2007, \
+     'data/stress/pbs_notee_op-geth-stress_pending_tx_smoothed.csv' u 1:4 every 2 w l ls 22004 notitle, \
+     '' u 1:4 every 10 t "PBS-noTEE" w lp ls 22004, \
+     'data/stress/pbs_tee_op-geth_stress_pending_tx_smoothed.csv' u 1:4 every 2 w l ls 22001 notitle, \
+        '' u 1:4 every 10 t "PBS-TEE" w lp ls 22001
 
 unset xrange
 eval mpNext
@@ -113,7 +113,7 @@ set style fill solid border -1
 
 
 #unset key 
-set ylabel "Gas used (wei)" font ",16"  offset 2,0
+set ylabel "Gas used" font ",16"  offset 2,0
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 set yrange [0:20000000]
 set xrange [0:120]
@@ -157,7 +157,7 @@ set ytics("200" 200, "400" 400, "600" 600, "800" 800, "1000" 1000) font ",12"
 set title "Tx gas used" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of Txs" font ",16"  offset 2.5,0
-set xlabel "Gas used (x100000 wei)" font ",16"
+set xlabel "Gas used (x100000)" font ",16"
 dx=0.08
 
 #set label "min = 1μs" at graph 0.6,0.9 font ",16"
