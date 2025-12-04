@@ -147,7 +147,7 @@ set xlabel offset 0,1,0
 #set xtics("0-500k" 0, "500k-650k" 1, "650k-850k" 2, "850k-1M" 3, "1M-1.3M" 4, "1.3M+" 5) offset 0,0.3,0 font ",10"
 set xtics("0-5" 0, "5-6.5" 1, "6.5-8.5" 2, "8.5-10" 3, "10-13" 4, "13+" 5 ) font ",10"
 #set xtics rotate by 45
-#set xrange [-0.7:10]
+set xrange [-0.5:6]
 
 
 
@@ -156,7 +156,7 @@ set ytics("200" 200, "400" 400, "600" 600, "800" 800, "1000" 1000) font ",12"
 set title "Tx gas used" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of Txs" font ",16"  offset 2.5,0
-set xlabel "Gas used (x100000)" font ",16"
+set xlabel "Gas used (x100k)" font ",16"
 dx=0.08
 
 #set label "min = 1μs" at graph 0.6,0.9 font ",16"
