@@ -1,1 +1,1 @@
-{"flood_version":"0.3.1","type":"single_test","name":"eth_call","test_parameters":{"flood_version":"0.3.1","test_name":"eth_call","rates":[100,200,300,400,500,600,700,800,900,1000],"durations":[60,60,60,60,60,60,60,60,60,60],"vegeta_args":null,"network":"ethereum","random_seed":null}}
+{"flood_version":"0.3.1","type":"single_test","name":"eth_call","test_parameters":{"flood_version":"0.3.1","test_name":"eth_call","rates":[100,200,300,400,500,600,700,800,900,1000],"durations":[30,30,30,30,30,30,30,30,30,30],"vegeta_args":null,"network":"ethereum","random_seed":null}}

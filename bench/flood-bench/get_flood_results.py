@@ -6,7 +6,7 @@ from typing import List
 # --- Configuration ---
 # NOTE: Replace '/path/tofolder' with the actual root directory path 
 # where your benchmark results (eth_call, eth_getBalance, etc.) are located.
-ROOT_BENCHMARK_DIR = './bench-output/nopbs-native' 
+ROOT_BENCHMARK_DIR = './bench-output/nopbs-tee' 
 
 # The folder where the final CSV files will be saved.
 OUTPUT_CSV_DIR = './csv_output'

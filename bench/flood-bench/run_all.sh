@@ -44,7 +44,7 @@ for TYPE in "${TYPES[@]}"; do
     flood "$TYPE" \
         nopbs-tee="$RPC_ENDPOINT" \
         --rates "${RATES[@]}" \
-        --duration 60 \
+        --duration 30 \
         --output="$OUTPUT_DIR"
 done
 
