@@ -21,7 +21,7 @@ load "linetypes.gnuplot"
 ## mp_height         # Total height of plot area
 ## mp_rowgap         # Gap between plot rows
 ## mp_colgap          # Gap between plot columns
-          
+     
 
 mp_startx=0.08
 mp_starty=0.15
@@ -50,12 +50,14 @@ eval mpNext
 
 set title "Time to inclusion (TTI)" font "Helvetica-bold,14" #offset 0,-0.2
 
-set ylabel "Num. of Txs" font ",16"  offset 4,0
+set ylabel "Num. of Txs" font ",16"  offset 2,0
 set xlabel "Time buckets" font ",16"
 set xtics font ",14"
 
 
 set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",14"
+set ytics("10k" 10000, "20k" 20000, "30k" 30000, "40k" 40000, "50k" 50000) font ",14"
+
 #set xtics rotate by 60
 
 set style fill solid border -1
@@ -68,7 +70,7 @@ dx=0.08
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 #set xrange[0:400]
-set yrange [0:5000]
+set yrange [0:50000]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
@@ -78,21 +80,25 @@ set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
 
 
 
-plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_tx_tti.csv' u ($1-dx):3 t "noPBS-noTEE" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
-    'data/no_pbs_tee/no-pbs_tee_30_tx_tti.csv' u ($1+dx):3 t "noPBS-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
-    'data/pbs_no_tee/pbs_rbuilder_no-tee_30_tx_tti.csv' u ($1+3*dx):3 t "PBS-noTEE"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
-    'data/pbs_tee/pbs_rbuilder_tee_30_tx_tti.csv' u ($1+5*dx):3 t "PBS-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
+plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_tx_tti.csv' u ($1-dx):3 t "noPBS-noTEE" with boxes ls 1 lc rgb C2 fillstyle pattern 4, \
+    'data/no_pbs_tee/no-pbs_tee_270_tx_tti.csv' u ($1+dx):3 t "noPBS-TEE"  with boxes ls 1 lc rgb C3 fillstyle pattern 2, \
+    'data/pbs_no_tee/pbs_rbuilder_no-tee_270_tx_tti.csv' u ($1+3*dx):3 t "PBS-noTEE"  with boxes ls 1 lc rgb C1 fillstyle pattern 3, \
+    'data/pbs_tee/pbs_rbuilder_tee_270_tx_tti.csv' u ($1+5*dx):3 t "PBS-TEE"  with boxes ls 1 lc rgb C5 fillstyle pattern 9
     
 
-
+unset ytics
 
 unset xtics
+
 eval mpNext
 # --- GRAPH b (top right)
-set xrange[0:350]
+set xrange[0:400]
+
+set ytics autofreq
+set ytics  font ",14"
+set yrange [0:1000]
 
 
-set yrange [0:160]
 set title "Pending Txs" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of pending Txs" font ",16"  offset 3,0
@@ -102,14 +108,14 @@ set xtics offset 0,0.4,0 font ",12"
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_tx_pending_tx_smoothed.csv' u 1:3 every 2  w l ls 2006 notitle, \
-     '' u 1:3 every 10 t "noPBS-noTEE" w lp ls 2006, \
-     'data/no_pbs_tee/no-pbs_tee_30_tx_pending_tx_smoothed.csv' u 1:3 every 2  w l ls 2007 notitle, \
-     '' u 1:3 every 10 t "noPBS-TEE" w lp ls 2007, \
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_30_tx_pending_tx_smoothed.csv' u 1:3 every 2 w l ls 22004 notitle, \
-     '' u 1:3 every 10 t "PBS-noTEE" w lp ls 22004, \
-     'data/pbs_tee/pbs_rbuilder_tee_30_tx_pending_tx_smoothed.csv' u 1:3 every 2 w l ls 22001 notitle, \
-        '' u 1:3 every 10 t "PBS-TEE" w lp ls 22001
+plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_tx_pending_tx_smoothed.csv' u 1:4 every 2  w l ls 2006 notitle, \
+     '' u 1:4 every 20 t "noPBS-noTEE" w lp ls 2006, \
+     'data/no_pbs_tee/no-pbs_tee_270_tx_pending_tx_smoothed.csv' u 1:4 every 2  w l ls 2007 notitle, \
+     '' u 1:4 every 20 t "noPBS-TEE" w lp ls 2007, \
+     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_tx_pending_tx_smoothed.csv' u 1:4 every 2 w l ls 22004 notitle, \
+     '' u 1:4 every 20 t "PBS-noTEE" w lp ls 22004, \
+     'data/pbs_tee/pbs_rbuilder_tee_270_tx_pending_tx_smoothed.csv' u 1:4 every 2 w l ls 22001 notitle, \
+        '' u 1:4 every 20 t "PBS-TEE" w lp ls 22001
      
 
 
