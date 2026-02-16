@@ -105,7 +105,7 @@ set ytics  font ",14"
 set yrange [0:200]
 
 
-set title "Pending Txs (270 TPS)" font "Helvetica-bold,14" #offset 0,-0.2
+set title "Pending Txs (30 TPS)" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Num. of pending Txs" font ",16"  offset 3,0
 set xlabel "Timestamp" font ",16" 
