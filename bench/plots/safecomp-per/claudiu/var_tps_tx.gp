@@ -63,7 +63,8 @@ set xlabel "Time buckets" font ",16"
 set xtics font ",14"
 
 
-set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",14"
+#set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",14"
+set xtics("[1,2[s" 0, "[2,3[s" 1, "[3,4[s" 2, "[4,5[s" 3, "5+s" 4) font ",14"
 
 
 #set xtics rotate by 60
@@ -135,7 +136,7 @@ set title "Time to inclusion (270 TPS)" font "Helvetica-bold,14" #offset 0,-0.2
 set ylabel "Num. of Txs" font ",16"  offset 2,0
 set xlabel "Time buckets" font ",16"
 
-set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",14"
+set xtics("[1,2[s" 0, "[2,3[s" 1, "[3,4[s" 2, "[4,5[s" 3, "5+s" 4) font ",14"
 set ytics("10k" 10000, "20k" 20000, "30k" 30000, "40k" 40000, "50k" 50000) font ",14"
 
 #set xtics rotate by 60
