@@ -6,7 +6,7 @@ set term postscript size 5in,2.3in linewidth 1 color eps enhanced 22
 set encoding utf8
 
 
-set output "cumulative_tx.eps"
+set output "cumulative_tti.eps"
 set datafile separator comma
 
 load "styles.inc"
@@ -48,10 +48,10 @@ eval mpNext
 # --- GRAPH a (top left)
 
 
-set title "PBS variants" font "Helvetica-bold,14" #offset 0,-0.2
+set title "30 TPS" font "Helvetica-bold,14" #offset 0,-0.2
 
-set ylabel "Included Txs (%)" font ",16"  offset 2,0
-set xlabel "Time buckets" font ",16"
+set ylabel "Included Txs (%)" font ",16"  offset 3.5,0
+set xlabel "TTI (s)" font ",16"
 set xtics font ",14"
 
 
@@ -70,7 +70,7 @@ dx=0.08
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 #set xrange[0:400]
-set yrange [0:100]
+set yrange [0:120]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
@@ -78,9 +78,14 @@ set yrange [0:100]
 
 set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
 
-plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_tx_cumulative_tx.csv' u 1:3 every 2 t "noPBS-noTEE" with steps ls 2006, \
-     'data/no_pbs_tee/no-pbs_tee_270_tx_cumulative_tx.csv' u 1:3 every 2 t "noPBS-TEE" with steps ls 2007
-
+plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2006 notitle, \
+     '' u 1:2 every 1 t "noPBS-noTEE" w lp ls 2006, \
+     'data/no_pbs_tee/no-pbs_tee_30_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2007 notitle, \
+     '' u 1:2 every 1 t "noPBS-TEE" w lp ls 2007, \
+     'data/pbs_no_tee/pbs_rbuilder_no-tee_30_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22004 notitle, \
+     '' u 1:2 every 1 t "PBS-noTEE" w lp ls 22004, \
+     'data/pbs_tee/pbs_rbuilder_tee_30_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22001 notitle, \
+     '' u 1:2 every 1 t "PBS-TEE" w lp ls 22001
     
 
 
@@ -93,28 +98,31 @@ eval mpNext
 #set xrange[0:400]
 
 set ytics  font ",14"
-set yrange [0:100]
+set yrange [0:120]
 
 
-set title "No PBS" font "Helvetica-bold,14" #offset 0,-0.2
+set title "270 TPS" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Included Txs (%)" font ",16"  offset 3,0
-set xlabel "Timestamp" font ",16" 
+set xlabel "TTI (s)" font ",16" 
 set xtics offset 0,0.4,0 font ",12"
 
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/pbs_no_tee/pbs_rbuilder_no-tee_270_tx_cumulative_tx.csv' u 2:3 every 2 w l ls 22004 notitle, \
-     '' u 2:3 every 20 t "PBS-noTEE" w lp ls 22004, \
-     'data/pbs_tee/pbs_rbuilder_tee_270_tx_cumulative_tx.csv' u 2:3 every 2 w l ls 22001 notitle, \
-     '' u 2:3 every 20 t "PBS-TEE" w lp ls 22001
+plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2006 notitle, \
+     '' u 1:2 every 1 t "noPBS-noTEE" w lp ls 2006, \
+     'data/no_pbs_tee/no-pbs_tee_270_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2007 notitle, \
+     '' u 1:2 every 1 t "noPBS-TEE" w lp ls 2007, \
+     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22004 notitle, \
+     '' u 1:2 every 1 t "PBS-noTEE" w lp ls 22004, \
+     'data/pbs_tee/pbs_rbuilder_tee_270_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22001 notitle, \
+     '' u 1:2 every 1 t "PBS-TEE" w lp ls 22001
      
      
-
-
+     
 ## Gas plots removed
      
-!epstopdf "cumulative_tx.eps"
-!rm "cumulative_tx.eps"
+!epstopdf "cumulative_tti.eps"
+!rm "cumulative_tti.eps"
 quit

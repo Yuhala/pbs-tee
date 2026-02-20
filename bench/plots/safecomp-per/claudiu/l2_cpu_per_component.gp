@@ -82,8 +82,8 @@ plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_sys_v2_op-batcher_cpu_ram.csv' u 1:4 
      '' u 1:4 every 2 t "noPBS-TEE" w lp ls 2007, \
      'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-batcher_cpu_ram.csv' u 1:4 every 2 w l ls 22004 notitle, \
      '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22004,\
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-batcher_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
-     '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22001
+     'data/pbs_tee/pbs_rbuilder_tee_270_sys_v2_op-batcher_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
+     '' u 1:4 every 2 t "PBS-TEE" w lp ls 22001
 
 
 eval mpNext
@@ -107,8 +107,8 @@ plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_sys_v2_op-geth_cpu_ram.csv' u 1:4 eve
      '' u 1:4 every 2 t "noPBS-TEE" w lp ls 2007, \
      'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-geth_cpu_ram.csv' u 1:4 every 2 w l ls 22004 notitle, \
      '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22004,\
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-geth_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
-     '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22001
+     'data/pbs_tee/pbs_rbuilder_tee_270_sys_v2_op-geth_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
+     '' u 1:4 every 2 t "PBS-TEE" w lp ls 22001
 
 
 
@@ -117,7 +117,7 @@ eval mpNext
 
 set title "op-node" font "Helvetica-bold,14" #offset 0,-0.2
 
-set ylabel "CPU (millicores)" font ",16"  offset 3,0
+set ylabel "CPU (millicores)" font ",16"  offset 3.5,0
 set xlabel "Timestamp (s)" font ",16"
 set xtics font ",14"
 
@@ -132,8 +132,8 @@ plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_sys_v2_op-node_cpu_ram.csv' u 1:4 eve
      '' u 1:4 every 2 t "noPBS-TEE" w lp ls 2007, \
      'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-node_cpu_ram.csv' u 1:4 every 2 w l ls 22004 notitle, \
      '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22004,\
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-node_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
-     '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22001
+     'data/pbs_tee/pbs_rbuilder_tee_270_sys_v2_op-node_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
+     '' u 1:4 every 2 t "PBS-TEE" w lp ls 22001
 
 
 
@@ -146,15 +146,15 @@ set ylabel "CPU (millicores)" font ",16"  offset 3,0
 set xlabel "Timestamp (s)" font ",16"
 set xtics font ",14"
 
-set yrange [0:300]
+set yrange [0:400]
 
 set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
 
 
 plot 'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-rbuilder_cpu_ram.csv' u 1:4 every 2 w l ls 22004 notitle, \
      '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22004,\
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_sys_v2_op-rbuilder_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
-     '' u 1:4 every 2 t "PBS-noTEE" w lp ls 22001
+     'data/pbs_tee/pbs_rbuilder_tee_270_sys_v2_op-rbuilder_cpu_ram.csv' u 1:4 every 2 w l ls 22001 notitle, \
+     '' u 1:4 every 2 t "PBS-TEE" w lp ls 22001
 
 
      

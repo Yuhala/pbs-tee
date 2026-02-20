@@ -1,70 +1,57 @@
-import pandas as pd
-import argparse
+#!/usr/bin/env python3
+
+import sys
 import os
+import pandas as pd
+import math
 
-def compute_inclusion_cdf(input_path):
-    # 1. Handle File Paths
-    if not os.path.exists(input_path):
-        print(f"Error: File '{input_path}' not found.")
-        return
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python cumu_tti.py <input_csv>")
+        sys.exit(1)
 
-    # Extract directory and filename without extension
-    file_dir = os.path.dirname(input_path)
-    base_name = os.path.basename(input_path)
-    name_only, _ = os.path.splitext(base_name)
-    
-    # Construct output name: name_cumulative_tx.csv
-    output_name = f"{name_only}_cumulative_tx.csv"
-    output_path = os.path.join(file_dir, output_name)
+    input_csv = sys.argv[1]
 
-    # 2. Load the data
-    try:
-        # We only need start_time to find T=0 and end_time for inclusion
-        df = pd.read_csv(input_path)
-    except Exception as e:
-        print(f"Error reading file: {e}")
-        return
+    if not os.path.exists(input_csv):
+        print(f"Error: File not found -> {input_csv}")
+        sys.exit(1)
 
-    if df.empty:
-        print("The CSV file is empty.")
-        return
+    # Load CSV
+    df = pd.read_csv(input_csv)
 
-    # 3. Define the global T=0 (earliest start_time) and T_last
-    t_zero = df['start_time'].min()
-    t_last = df['end_time'].max()
-    total_txs = len(df)
+    # Check required columns
+    required_cols = {"start_time", "end_time"}
+    if not required_cols.issubset(df.columns):
+        print("Error: CSV must contain 'start_time' and 'end_time' columns")
+        sys.exit(1)
 
-    # 4. Count inclusions per absolute timestamp
-    inclusion_counts = df.groupby('end_time').size().reset_index(name='count')
+    # Compute TTI (in seconds)
+    df["tti"] = df["end_time"] - df["start_time"]
 
-    # 5. Create continuous timeline from T=0 to final inclusion (T_last)
-    # This ensures we don't have gaps in our time series
-    full_timeline = pd.DataFrame({'real_timestamp': range(t_zero, t_last + 1)})
+    # Total number of transactions
+    N = len(df)
 
-    # 6. Merge counts into timeline and calculate cumulative percentage
-    cdf_df = pd.merge(full_timeline, inclusion_counts, left_on='real_timestamp', right_on='end_time', how='left')
-    cdf_df['count'] = cdf_df['count'].fillna(0)
-    cdf_df['cumulative_count'] = cdf_df['count'].cumsum()
-    cdf_df['percentage_included'] = (cdf_df['cumulative_count'] / total_txs) * 100
+    # Max TTI (for time axis)
+    max_tti = int(math.ceil(df["tti"].max()))
 
-    # 7. Add the relative timestamp column (Column 1)
-    cdf_df['relative_timestamp'] = cdf_df['real_timestamp'] - t_zero
+    # Build time-based CDF
+    output_rows = []
 
-    # 8. Organize Columns: [Relative, Real, Percentage]
-    output = cdf_df[['relative_timestamp', 'real_timestamp', 'percentage_included']]
-    
-    # 9. Save and Print
-    output.to_csv(output_path, index=False)
-    
-    print(f"Success!")
-    print(f"Input:  {input_path}")
-    print(f"Output: {output_path}")
-    print("-" * 50)
-    #print(output.to_string(index=False))
+    for t in range(0, max_tti + 1):
+        included = (df["tti"] <= t).sum()
+        percent = (included / N) * 100.0
+        output_rows.append([t, percent])
+
+    out_df = pd.DataFrame(output_rows, columns=["timestamp", "percent_included"])
+
+    # Output file name
+    base_name = os.path.splitext(input_csv)[0]
+    output_csv = f"{base_name}_cumu_tti.csv"
+
+    # Save
+    out_df.to_csv(output_csv, index=False)
+
+    print(f"Output written to: {output_csv}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Compute CDF of transaction inclusion.")
-    parser.add_argument("file", help="Path to the source CSV file")
-    
-    args = parser.parse_args()
-    compute_inclusion_cdf(args.file)
+    main()
