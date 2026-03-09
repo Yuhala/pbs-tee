@@ -51,8 +51,8 @@ eval mpNext
 set title "30 TPS" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Included Txs (%)" font ",16"  offset 3.5,0
-set xlabel "TTI (s)" font ",16"
-set xtics font ",14"
+set xlabel "TTI (ms)" font ",16"
+set xtics font ",12"
 
 
 #set xtics("1-2s" 0, "2-3s" 1, "3-4s" 2, "4-5s" 3, "5+s" 4) font ",14"
@@ -69,23 +69,27 @@ set xlabel offset 0,1,0
 dx=0.08
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
-#set xrange[0:400]
+set xrange[0:4500]
 set yrange [0:120]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
 #set key samplen 1 font ",14" at graph 0.5,0.95
 
-set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",14"
+set key samplen 0.75 maxrows 2 at graph 0.5, 0.95 center font ",10"
 
-plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2006 notitle, \
-     '' u 1:2 every 1 t "noPBS-noTEE" w lp ls 2006, \
-     'data/no_pbs_tee/no-pbs_tee_30_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2007 notitle, \
-     '' u 1:2 every 1 t "noPBS-TEE" w lp ls 2007, \
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_30_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22004 notitle, \
-     '' u 1:2 every 1 t "PBS-noTEE" w lp ls 22004, \
-     'data/pbs_tee/pbs_rbuilder_tee_30_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22001 notitle, \
-     '' u 1:2 every 1 t "PBS-TEE" w lp ls 22001
+plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_tx_cumu_tti.csv' u 1:2 every 50  w l ls 2006 notitle, \
+     '' u 1:2 every 300 t "noPBS-noTEE" w lp ls 2006, \
+     'data/no_pbs_tee/no-pbs_tee_30_tx_cumu_tti.csv' u 1:2 every 50  w l ls 2007 notitle, \
+     '' u 1:2 every 300 t "noPBS-TEE" w lp ls 2007, \
+     'data/pbs_no_tee/pbs_geth_no-tee_30_tx_cumu_tti.csv' u 1:2 every 50 w l ls 22004 notitle, \
+     '' u 1:2 every 300 t "PBS-noTEE" w lp ls 22004, \
+     'data/pbs_tee/pbs_geth_tee_30_tx_cumu_tti.csv' u 1:2 every 50 w l ls 22001 notitle, \
+     '' u 1:2 every 300 t "PBS-TEE" w lp ls 22001, \
+     'data/pbs_no_tee/pbs_rbuilder_no-tee_30_tx_cumu_tti.csv' u 1:2 every 50 w l ls 2002 notitle, \
+     '' u 1:2 every 300 t "PBS-noTEE-rb" w lp ls 2002, \
+     'data/pbs_tee/pbs_rbuilder_tee_30_tx_cumu_tti.csv' u 1:2 every 50 w l ls 2004 notitle, \
+     '' u 1:2 every 300 t "PBS-TEE-rb" w lp ls 2004
     
 
 
@@ -101,23 +105,27 @@ set ytics  font ",14"
 set yrange [0:120]
 
 
-set title "270 TPS" font "Helvetica-bold,14" #offset 0,-0.2
+set title "210 TPS" font "Helvetica-bold,14" #offset 0,-0.2
 
 set ylabel "Included Txs (%)" font ",16"  offset 3,0
-set xlabel "TTI (s)" font ",16" 
+set xlabel "TTI (ms)" font ",16" 
 set xtics offset 0,0.4,0 font ",12"
 
 
 #set key samplen 1 maxrows 1 center top outside at graph 0.5, 1.0 font ",14"
 
-plot 'data/no_pbs_no_tee/no-pbs_no-tee_270_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2006 notitle, \
-     '' u 1:2 every 1 t "noPBS-noTEE" w lp ls 2006, \
-     'data/no_pbs_tee/no-pbs_tee_270_tx_cumu_tti.csv' u 1:2 every 1  w l ls 2007 notitle, \
-     '' u 1:2 every 1 t "noPBS-TEE" w lp ls 2007, \
-     'data/pbs_no_tee/pbs_rbuilder_no-tee_270_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22004 notitle, \
-     '' u 1:2 every 1 t "PBS-noTEE" w lp ls 22004, \
-     'data/pbs_tee/pbs_rbuilder_tee_270_tx_cumu_tti.csv' u 1:2 every 1 w l ls 22001 notitle, \
-     '' u 1:2 every 1 t "PBS-TEE" w lp ls 22001
+plot 'data/no_pbs_no_tee/no-pbs_no-tee_210_tx_cumu_tti.csv' u 1:2 every 50  w l ls 2006 notitle, \
+     '' u 1:2 every 300 t "noPBS-noTEE" w lp ls 2006, \
+     'data/no_pbs_tee/no-pbs_tee_210_tx_cumu_tti.csv' u 1:2 every 50  w l ls 2007 notitle, \
+     '' u 1:2 every 300 t "noPBS-TEE" w lp ls 2007, \
+     'data/pbs_no_tee/pbs_geth_no-tee_210_tx_cumu_tti.csv' u 1:2 every 50 w l ls 22004 notitle, \
+     '' u 1:2 every 300 t "PBS-noTEE" w lp ls 22004, \
+     'data/pbs_tee/pbs_geth_tee_210_tx_cumu_tti.csv' u 1:2 every 50 w l ls 22001 notitle, \
+     '' u 1:2 every 300 t "PBS-TEE" w lp ls 22001, \
+     'data/pbs_no_tee/pbs_rbuilder_no-tee_210_tx_cumu_tti.csv' u 1:2 every 50 w l ls 2002 notitle, \
+     '' u 1:2 every 300 t "PBS-noTEE-rb" w lp ls 2002, \
+     'data/pbs_tee/pbs_rbuilder_tee_210_tx_cumu_tti.csv' u 1:2 every 50 w l ls 2004 notitle, \
+     '' u 1:2 every 300 t "PBS-TEE-rb" w lp ls 2004
      
      
      

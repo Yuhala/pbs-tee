@@ -1,66 +1,44 @@
 #!/usr/bin/env python3
+
+import pandas as pd
 import sys
-import csv
-import os
+from pathlib import Path
 
-# =========================
-# SCRIPT
-# =========================
-def main():
-    if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} <input_csv_file> <pod_prefix>")
-        print(f"Example: {sys.argv[0]} metrics.csv op-geth")
-        sys.exit(1)
 
-    input_file = sys.argv[1]
-    pod_prefix = sys.argv[2]   # e.g. "op-geth", "op-node", "beacon"
+def extract_component(input_file, component_name):
+    input_path = Path(input_file)
 
-    if not os.path.isfile(input_file):
-        print(f"Error: file not found: {input_file}")
-        sys.exit(1)
+    # Read CSV
+    df = pd.read_csv(input_path)
 
-    base, ext = os.path.splitext(input_file)
-    output_file = f"{base}_{pod_prefix}_cpu_ram.csv"
+    # Parse timestamp
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-    rows = []
+    # Filter component
+    df = df[df["component"] == component_name].copy()
 
-    with open(input_file, newline="") as f:
-        reader = csv.DictReader(f)
+    if df.empty:
+        print(f"No rows found for component: {component_name}")
+        return
 
-        for row in reader:
-            pod_name = row.get("Pod", "")
-            if pod_name.startswith(pod_prefix):
-                rows.append({
-                    "Timestamp": row.get("Timestamp"),
-                    "CPU(m)": row.get("CPU(m)"),
-                    "RAM(Mi)": row.get("RAM(Mi)"),
-                    "Pod": pod_name
-                })
+    # Sort by timestamp
+    df = df.sort_values("timestamp").reset_index(drop=True)
 
-    if not rows:
-        print(f"No data found for pods starting with: {pod_prefix}")
-        sys.exit(1)
+    # Create time index column (0, 15, 30, ...)
+    df.insert(0, "time_index (s)", df.index * 15)
 
-    with open(output_file, "w", newline="") as f:
-        writer = csv.writer(f)
+    # Output file in same folder as input
+    output_file = input_path.parent / f"{input_path.stem}_{component_name}.csv"
 
-        # Header
-        writer.writerow(["Index", "Pod", "Timestamp", "CPU(m)", "RAM(Mi)"])
+    # Write CSV
+    df.to_csv(output_file, index=False)
 
-        # Data
-        for idx, row in enumerate(rows):
-            writer.writerow([
-                idx,
-                row["Pod"],
-                row["Timestamp"],
-                row["CPU(m)"],
-                row["RAM(Mi)"]
-            ])
-
-    print(f"Output written to: {output_file}")
-    print(f"Matched prefix: {pod_prefix}")
-    print(f"Rows extracted: {len(rows)}")
+    print(f"Written: {output_file}")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 3:
+        print("Usage: python get_pod_metrics.py <input.csv> <component-name>")
+        sys.exit(1)
+
+    extract_component(sys.argv[1], sys.argv[2])
