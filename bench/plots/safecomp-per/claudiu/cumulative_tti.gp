@@ -41,7 +41,7 @@ label_size = 18
 
 set ytics nomirror
 set grid y
-set ytics font ",12"
+set ytics font ",13"
 
 
 eval mpNext
@@ -70,13 +70,13 @@ dx=0.08
 #set offset 25, -0.5, 0, 0 #left,right,top,bottom
 
 set xrange[0:4500]
-set yrange [0:120]
+set yrange [0:140]
 
 #set key samplen 1 font ",14" at graph 0.5,0.95
 #set key maxrows 1 samplen 0.5 width -2 invert center at graph 1.1,1.125 font ",12"
 #set key samplen 1 font ",14" at graph 0.5,0.95
 
-set key samplen 0.75 maxrows 2 at graph 0.5, 0.95 center font ",10"
+set key samplen 0.75 maxrows 3 at graph 0.5, 0.9 center font ",14"
 
 plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_tx_cumu_tti.csv' u 1:2 every 50  w l ls 2006 notitle, \
      '' u 1:2 every 300 t "noPBS-noTEE" w lp ls 2006, \
@@ -101,8 +101,8 @@ eval mpNext
 # --- GRAPH b (top right)
 #set xrange[0:400]
 
-set ytics  font ",14"
-set yrange [0:120]
+set ytics  font ",13"
+set yrange [0:140]
 
 
 set title "210 TPS" font "Helvetica-bold,14" #offset 0,-0.2

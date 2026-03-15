@@ -72,7 +72,7 @@ set yrange [0:0.25]
 
 #set logscale y
 
-set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",10"
+set key samplen 0.75 maxrows 3 at graph 0.5, 0.9 center font ",14"
 
 
 plot 'data/no_pbs_no_tee/no-pbs_no-tee_30_sys_op-geth.csv' u 1:4 every 4  w l ls 2006 notitle, \
@@ -104,7 +104,7 @@ set xtics font ",14"
 set yrange [0:1]
 set xrange[0:700]
 
-set key samplen 0.75 maxrows 2 at graph 0.5, 0.98 center font ",10"
+set key samplen 0.75 maxrows 3 at graph 0.5, 0.9 center font ",14"
 
 plot 'data/no_pbs_no_tee/no-pbs_no-tee_210_sys_op-geth.csv' u 1:4 every 4  w l ls 2006 notitle, \
      '' u 1:4 every 4 t "noPBS-noTEE" w lp ls 2006, \
